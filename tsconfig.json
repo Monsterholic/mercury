@@ -1,0 +1,16 @@
+{
+  "compilerOptions":{
+    "target":"es2019",
+    "lib":["es2019", "esnext.asynciterable"],
+    "module":"commonjs",
+    "types" : ["reflect-metadata", "node"],
+    "outDir": "dist",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "sourceMap": true
+  },
+  "include": ["src/**/*.ts", "test/**/*.ts"],
+  "exclude": ["node_modules", "build"],
+  "buildOnSave": true,
+  "compileOnSave": true
+}
