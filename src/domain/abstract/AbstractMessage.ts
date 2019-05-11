@@ -1,4 +1,4 @@
-import { IMessage } from "../interface/IMessage";
+import { IMessage } from "../interfaces/IMessage";
 
 export default abstract class AbstractMessage implements IMessage {
     _identifier: string;
