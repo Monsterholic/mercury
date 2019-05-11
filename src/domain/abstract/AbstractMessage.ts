@@ -10,4 +10,12 @@ export default abstract class AbstractMessage implements IMessage {
         this._identifier = identifier;
     }
 
+    public getContent() {
+        return this._content
+    }
+
+    public getIdentifier() {
+        return this._identifier
+    }
+
 }
