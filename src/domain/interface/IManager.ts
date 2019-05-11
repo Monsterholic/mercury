@@ -1,3 +1,5 @@
-export default interface IManager {
-    subscribe(message:string,)
+namespace src.domain.interface {
+    export interface IManager {
+        subscribe(message:string,)
+    }
 }
