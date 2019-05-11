@@ -1,3 +1,4 @@
 export default interface IManager {
-    subscribe(message:string,)
+    subscribe(messageIdentifier:string,handlerSymbol:symbol):void
+    getHandlers(messageIdentifier:string):Array<symbol>
 }

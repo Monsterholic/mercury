@@ -8,6 +8,7 @@ export default abstract class AbstractMessage implements IMessage {
     constructor(identifier, content) {
         this._content = content;
         this._identifier = identifier;
+        this._date = new Date()
     }
 
     public getContent() {
