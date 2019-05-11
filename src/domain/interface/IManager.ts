@@ -1,5 +1,4 @@
-namespace src.domain.interface {
-    export interface IManager {
-        subscribe(message:string,)
-    }
+export interface IManager {
+    subscribe(message:string,)
 }
+
