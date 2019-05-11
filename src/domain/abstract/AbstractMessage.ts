@@ -3,7 +3,7 @@ import { IMessage } from "../interface/IMessage";
 export default abstract class AbstractMessage implements IMessage {
     _identifier: string;
     _content: string;
-    _data: Date;
+    _date: Date;
 
     constructor(identifier, content) {
         this._content = content;
