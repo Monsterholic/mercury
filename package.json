@@ -1,0 +1,23 @@
+{
+  "name": "event-bus",
+  "version": "1.0.0",
+  "description": "facilitador de mensageria",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cl3dson/event-bus.git"
+  },
+  "keywords": [
+    "messaging",
+    "bus"
+  ],
+  "author": "cl3dson",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/cl3dson/event-bus/issues"
+  },
+  "homepage": "https://github.com/cl3dson/event-bus#readme"
+}
