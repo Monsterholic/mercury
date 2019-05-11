@@ -27,6 +27,8 @@
     "eslint-plugin-import": "^2.17.2"
   },
   "dependencies": {
-    "typescript": "^3.4.5"
+    "typescript": "^3.4.5",
+    "@types/amqplib": "^0.5.11",
+    "amqplib": "^0.5.3"
   }
 }
