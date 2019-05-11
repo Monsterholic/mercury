@@ -1,4 +1,4 @@
-namespace src.domain.bus {
+namespace src.domain.interface {
     export interface IMessageBus {
         eventManager: any;
         publish(msg): Promise<void>
