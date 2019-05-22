@@ -1,5 +1,5 @@
 export interface IMessage {
     _identifier : string
-    _content : string
+    _content : object
     _date : Date
 }
