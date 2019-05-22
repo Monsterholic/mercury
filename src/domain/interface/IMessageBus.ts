@@ -1,9 +1,7 @@
-import IManager from "./IManager";
-import AbstractMessage from "../abstract/AbstractMessage";
+import AbstractMessage from '../abstract/AbstractMessage';
 
-export interface IMessageBus {
-    eventManager: IManager
-    publish(msg: AbstractMessage): Promise<void>
-    subscribeAll(): Promise<void>
-    consume(): Promise<void>
+export default interface IMessageBus {
+    publish(route: string, message: AbstractMessage): Promise<void>;
+    subscribeAll(): Promise<void>;
+    consume(): Promise<void>;
 }
