@@ -1,21 +1,26 @@
 import { inject, injectable, postConstruct, interfaces } from 'inversify';
-import { ConsumeMessage } from 'amqplib';
+import {Channel, ConsumeMessage} from 'amqplib';
 
 import IMessageBus from '../../domain/interface/IMessageBus';
-import IManager from '../../domain/interface/IManager';
+import IMessageManager from '../../domain/interface/IMessageManager';
 import AbstractMessage from '../../domain/abstract/AbstractMessage';
-import IRabbitMQConnection from './interface/IRabbitMQConnection';
+import IAMQPConnection from '../interface/IAMQPConnection';
 import InvalidMessageRouteError from './error/InvalidMessageRouteError';
+import Types from '../../IoC/Types';
 
 @injectable()
 export class RabbitMQBus implements IMessageBus {
     private static readonly MAIN_EXCHANGE = 'main';
 
-    private readonly _eventManager: IManager;
-    private readonly _connection: IRabbitMQConnection;
+    private readonly _messageManager: IMessageManager;
+    private readonly _connection: IAMQPConnection;
 
-    constructor(connection: IRabbitMQConnection) {
+    constructor(
+        @inject(Types.IAMQPConnection) connection: IAMQPConnection,
+        @inject(Types.IMessageManager) messageManager: IMessageManager,
+    ) {
         this._connection = connection;
+        this._messageManager = messageManager;
     }
 
     /**
@@ -26,10 +31,10 @@ export class RabbitMQBus implements IMessageBus {
      * @param route (in this case this is exactly the same identifier of the event or command)
      * @param message (content of the message)
      */
-    async publish(route: string, message: AbstractMessage): Promise<void> {
+    public async publishMessage(route: string, message: AbstractMessage): Promise<void> {
         if (!route) throw new InvalidMessageRouteError();
-
         if (!this._connection.isConnected()) await this._connection.connect();
+
         let channel = await this._connection.getChannel();
         try {
             await channel.publish(
@@ -44,13 +49,40 @@ export class RabbitMQBus implements IMessageBus {
         return;
     }
 
-    subscribeAll(): Promise<void> {
-        throw new Error('Method not implemented.');
+
+    private async subscribeAll(): Promise<void> {
+        //TODO
     }
 
-    async consume(): Promise<void> {
+    private async subscribe(messageIdentifier:string,MessageHandlerSymbol:symbol):Promise<void>{
+        if(!this._connection.isConnected())
+            await this._connection.connect()
+
+        let channel = await this._connection.getChannel()
+        this.assertExchange(channel)
+        this.assertQueue(channel,messageIdentifier)
+        this.bindQueueToExchange(channel,messageIdentifier,messageIdentifier)
+        await channel.close()
+
+    }
+
+    private async assertExchange(channel:Channel):Promise<void>{
+        await channel.assertExchange(RabbitMQBus.MAIN_EXCHANGE,'direct',{autoDelete: false, durable: false})
+    }
+
+    private async assertQueue(channel:Channel,queueName:string):Promise<void>{
+        await channel.assertQueue(queueName,{durable: false, exclusive: false, autoDelete: false})
+    }
+
+    private async bindQueueToExchange(channel:Channel, eventIdentifier:string, queueName:string){
+        await channel.bindQueue(queueName,RabbitMQBus.MAIN_EXCHANGE,eventIdentifier)
+    }
+
+    async consumeMessages(): Promise<void> {
         let channel = await this._connection.getChannel();
         channel.consume('para configura', (msg: ConsumeMessage) => {});
         return;
     }
+
+
 }
