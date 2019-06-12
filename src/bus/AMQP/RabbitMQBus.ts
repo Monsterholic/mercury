@@ -21,6 +21,13 @@ export class RabbitMQBus implements IMessageBus {
     ) {
         this._connection = connection;
         this._messageManager = messageManager;
+
+    }
+
+    @postConstruct()
+    private async postConstruct(){
+
+        await this.consumeMessages()
     }
 
     /**
@@ -78,7 +85,7 @@ export class RabbitMQBus implements IMessageBus {
         await channel.bindQueue(queueName,RabbitMQBus.MAIN_EXCHANGE,eventIdentifier)
     }
 
-    async consumeMessages(): Promise<void> {
+    private async consumeMessages(): Promise<void> {
         let channel = await this._connection.getChannel();
         channel.consume('para configura', (msg: ConsumeMessage) => {});
         return;
