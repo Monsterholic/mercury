@@ -1,7 +1,6 @@
 const Types = {
-    IMessageManager: Symbol.for('IMessageManager'),
-    IMessageBus: Symbol.for('IMessageBus'),
-    IAMQPConnection: Symbol.for('IAMQPConnection'),
+    IConnectionManager: Symbol.for('IConnectionManager'),
+    IMessageBus: Symbol.for('IMessageBus')
 };
 
 export default Types
