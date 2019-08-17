@@ -1,44 +1,50 @@
 {
-  "name": "event-bus",
-  "version": "1.0.0",
-  "description": "facilitador de mensageria",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "eslint '*/**/*.{js,ts,tsx}' --fix"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/cl3dson/event-bus.git"
-  },
-  "keywords": [
-    "messaging",
-    "bus"
-  ],
-  "author": "cl3dson",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/cl3dson/event-bus/issues"
-  },
-  "homepage": "https://github.com/cl3dson/event-bus#readme",
-  "devDependencies": {
-    "@types/node": "^10.14.9",
-    "eslint": "^5.16.0",
-    "eslint-config-airbnb-base": "^13.1.0",
-    "eslint-plugin-import": "^2.17.2",
-    "mocha": "^6.1.4"
-  },
-  "dependencies": {
-    "@types/amqplib": "^0.5.11",
-    "@types/inversify": "^2.0.33",
-    "@typescript-eslint/eslint-plugin": "^1.9.0",
-    "@typescript-eslint/parser": "^1.9.0",
-    "amqplib": "^0.5.3",
-    "eslint-config-prettier": "^4.3.0",
-    "eslint-plugin-prettier": "^3.1.0",
-    "inversify": "^5.0.1",
-    "prettier": "^1.17.1",
-    "reflect-metadata": "^0.1.13",
-    "typescript": "^3.4.5"
-  }
+    "name": "event-bus",
+    "version": "1.0.0",
+    "description": "facilitador de mensageria",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "lint": "eslint '*/**/*.{js,ts,tsx}' --fix"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/cl3dson/event-bus.git"
+    },
+    "keywords": [
+        "messaging",
+        "bus"
+    ],
+    "author": "cl3dson",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/cl3dson/event-bus/issues"
+    },
+    "homepage": "https://github.com/cl3dson/event-bus#readme",
+    "devDependencies": {
+        "@types/node": "^10.14.9",
+        "eslint": "^5.16.0",
+        "eslint-config-airbnb-base": "^13.1.0",
+        "eslint-plugin-import": "^2.17.2",
+        "husky": "^3.0.3",
+        "mocha": "^6.1.4",
+        "pretty-quick": "^1.11.1"
+    },
+    "dependencies": {
+        "@types/amqplib": "^0.5.11",
+        "@typescript-eslint/eslint-plugin": "^1.9.0",
+        "@typescript-eslint/parser": "^1.9.0",
+        "amqplib": "^0.5.3",
+        "eslint-config-prettier": "^4.3.0",
+        "eslint-plugin-prettier": "^3.1.0",
+        "inversify": "^5.0.1",
+        "prettier": "^1.17.1",
+        "reflect-metadata": "^0.1.13",
+        "typescript": "^3.4.5"
+    },
+    "husky": {
+        "hooks": {
+            "pre-commit": "pretty-quick --staged"
+        }
+    }
 }
