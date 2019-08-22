@@ -1,6 +1,8 @@
 import ConnectionFacade from './ConnectionFacade';
 import { connect, Connection } from 'amqplib';
 import Message from '../message/Message';
+import MessageEmitter from '../messageBus/MessageBusEventEmitter';
+import JSONMessage from '../message/JSONMessage';
 
 export default class RabbitMQConnectionFacade implements ConnectionFacade {
     private connection: Connection;
@@ -25,6 +27,13 @@ export default class RabbitMQConnectionFacade implements ConnectionFacade {
         } catch (e) {
             console.log(e);
         }
+
+        let channel = await this.connection.createChannel();
+        channel.consume(`${this.serviceName}_message_queue`, msg => {
+            const emitter = MessageEmitter.getMessageEmitter();
+            const message = new JSONMessage(msg.fields.routingKey, msg.content);
+            emitter.emit(msg.fields.routingKey, message);
+        });
     }
 
     public publish(message: Message): Promise<void> {
