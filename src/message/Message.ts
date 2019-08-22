@@ -4,8 +4,8 @@ export default abstract class Message {
     private readonly content: any;
     private readonly creationDate: Date;
 
-    public constructor(descriptor: string, content: any) {
-        this.uuid = this.generateUUID();
+    public constructor(descriptor: string, content: any, id: string = null) {
+        this.uuid = id === null ? this.generateUUID() : id;
         this.descriptor = descriptor;
         this.content = content;
         this.creationDate = new Date();

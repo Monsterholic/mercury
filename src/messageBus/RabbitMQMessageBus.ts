@@ -7,12 +7,13 @@ interface OptionsMap {
     hostName: string;
     userName: string;
     password: string;
+    serviceName: string;
 }
 
 export default class RabbitMQMessageBus extends AbstractMessageBus<RabbitMQConnectionFacade> {
     public async configure(args: OptionsMap): Promise<void> {
-        let { hostName, userName, password, appName } = args;
-        this.connectionFacade = new RabbitMQConnectionFacade(appName);
+        let { hostName, userName, password, appName, serviceName } = args;
+        this.connectionFacade = new RabbitMQConnectionFacade(serviceName, appName);
         await this.connectionFacade.connect(hostName, userName, password);
 
         const descriptors: string[] = Reflect.getMetadata('descriptors', Mercury);

@@ -3,13 +3,16 @@ import { connect, Connection } from 'amqplib';
 import Message from '../message/Message';
 import MessageEmitter from '../messageBus/MessageBusEventEmitter';
 import JSONMessage from '../message/JSONMessage';
+import { error } from 'util';
 
 export default class RabbitMQConnectionFacade implements ConnectionFacade {
     private connection: Connection;
     private readonly serviceName: string;
+    private readonly appName: string;
 
-    public constructor(serviceName: string) {
+    public constructor(serviceName: string, appName: string) {
         this.serviceName = serviceName;
+        this.appName = appName;
     }
 
     public async connect(hostname: string, username: string, password: string): Promise<void> {
@@ -28,11 +31,30 @@ export default class RabbitMQConnectionFacade implements ConnectionFacade {
             console.log(e);
         }
 
+        //Verificar possivel realocação desse trecho de codigo para a classe de "Bus especifica"
         let channel = await this.connection.createChannel();
+        const messagePull = new Map();
+
         channel.consume(`${this.serviceName}_message_queue`, msg => {
             const emitter = MessageEmitter.getMessageEmitter();
-            const message = new JSONMessage(msg.fields.routingKey, msg.content);
-            emitter.emit(msg.fields.routingKey, message);
+
+            if (msg.properties.appId === this.appName) {
+                const descriptor = msg.fields.routingKey;
+
+                messagePull.set(msg.properties.messageId, msg);
+
+                emitter.on('error', messageId => {
+                    channel.nack(msg);
+                });
+
+                emitter.on('success', messageId => {
+                    channel.ack(msg);
+                });
+
+                const message = new JSONMessage(descriptor, msg.content, msg.properties.messageId);
+
+                emitter.emit(descriptor, message);
+            }
         });
     }
 

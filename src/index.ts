@@ -6,7 +6,7 @@ export default class Index {
     public static main(): void {
         let mercury = new Mercury('rabbitmq');
 
-        mercury.start('localhost', 'guest', 'guest', 'testeApp');
+        mercury.start('localhost', 'guest', 'guest', 'testeApp', 'testeService');
     }
 }
 

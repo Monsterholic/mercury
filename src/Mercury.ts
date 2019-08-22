@@ -18,7 +18,7 @@ export default class Mercury {
         }
     }
 
-    public async start(hostName, userName, password, appName) {
-        await this.messageBus.configure({ hostName, userName, password, appName });
+    public async start(hostName: string, userName: string, password: string, appName: string, serviceName: string) {
+        await this.messageBus.configure({ hostName, userName, password, appName, serviceName });
     }
 }

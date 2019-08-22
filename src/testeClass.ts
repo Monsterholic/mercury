@@ -4,6 +4,7 @@ export default class TesteClass {
     @handler('coisaCancelada')
     public handler() {
         console.log('evento coisa cancelada AConteceu');
+        throw new Error('Erro teste');
     }
 
     @handler('coisaComprada')
