@@ -1,17 +1,12 @@
-import ContainerBuilder from './IoC/ContainerBuilder';
-import Types from './IoC/Types';
-import { RabbitMQBus } from './bus/RabbitMQBus';
-import IMessageBus from './bus/IMessageBus';
+import 'reflect-metadata';
+import Mercury from './Mercury';
+import './testeClass';
 
 export default class Index {
     public static main(): void {
-        let container = ContainerBuilder.buildContainer();
-        container.bind('LOL').to(RabbitMQBus);
-        const bus = container.get<IMessageBus<any, any>>('LOL');
+        let mercury = new Mercury('rabbitmq');
 
-        bus.consumeMessages();
-
-        console.log('workerd');
+        mercury.start('localhost', 'guest', 'guest', 'testeApp');
     }
 }
 

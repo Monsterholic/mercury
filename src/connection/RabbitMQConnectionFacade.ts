@@ -1,36 +1,47 @@
-import IConnectionFacade from './IConnectionFacade';
-import ISerializable from '../message/ISerializable';
+import ConnectionFacade from './ConnectionFacade';
 import { connect, Connection } from 'amqplib';
+import Message from '../message/Message';
 
-export default class RabbitMQConnectionFacade<T extends ISerializable> implements IConnectionFacade<T> {
+export default class RabbitMQConnectionFacade implements ConnectionFacade {
     private connection: Connection;
-    private serviceName: string;
+    private readonly serviceName: string;
 
-    constructor(serviceName: string) {
+    public constructor(serviceName: string) {
         this.serviceName = serviceName;
     }
 
     public async connect(hostname: string, username: string, password: string): Promise<void> {
-        this.connection = await connect({
-            protocol: 'amqp',
-            hostname,
-            port: 5672,
-            username,
-            password,
-        });
+        //TODO colocar handlers de eventos para caso a conexao caia
+        try {
+            this.connection = await connect({
+                protocol: 'amqp',
+                hostname,
+                port: 5672,
+                username,
+                password,
+            });
 
-        await this.setUp();
+            await this.setUp();
+        } catch (e) {
+            console.log(e);
+        }
     }
 
-    public pulish(T): Promise<void> {
+    public publish(message: Message): Promise<void> {
         return undefined;
+    }
+
+    public async subscribe(descriptor: string): Promise<void> {
+        let channel = await this.connection.createChannel();
+        await channel.bindQueue(`${this.serviceName}_message_queue`, `${this.serviceName}_exchange`, descriptor);
+        await channel.close();
     }
 
     private async setUp(): Promise<void> {
         let channel = await this.connection.createChannel();
 
         /* Creating Exchanges and queues */
-        await channel.assertExchange('hermes_main_message_bus', 'fanout', {
+        await channel.assertExchange('mercury_main_message_bus', 'fanout', {
             durable: true,
             autoDelete: false,
         });
@@ -54,7 +65,7 @@ export default class RabbitMQConnectionFacade<T extends ISerializable> implement
         });
 
         /* Creating the basic bindings */
-        await channel.bindExchange('hermes_main_message_bus', `${this.serviceName}_message_broker`, '');
+        await channel.bindExchange('mercury_main_message_bus', `${this.serviceName}_exchange`, '');
         await channel.bindQueue(
             `${this.serviceName}_message_queue_dead_letter`,
             `${this.serviceName}_exchange_dead_letter`,
@@ -63,11 +74,9 @@ export default class RabbitMQConnectionFacade<T extends ISerializable> implement
         await channel.close();
     }
 
-    async subscribeToTopics(topics: Array<string>): Promise<void> {
-        let channel = await this.connection.createChannel();
-
-        for (let topic of topics) {
-            await channel.bindQueue(`${this.serviceName}_message_queue`, `${this.serviceName}_exchange`, topic);
+    public async subscribeAll(descriptors: string[]): Promise<void> {
+        for (let descriptor of descriptors) {
+            await this.subscribe(descriptor);
         }
     }
 }
