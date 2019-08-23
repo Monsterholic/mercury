@@ -1,7 +1,7 @@
 export default abstract class Message {
     private readonly uuid: string;
     private readonly descriptor: string;
-    private readonly content: any;
+    protected readonly content: any;
     private readonly creationDate: Date;
 
     public constructor(descriptor: string, content: any, id: string = null) {

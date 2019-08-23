@@ -4,6 +4,7 @@ import Message from '../message/Message';
 import MessageEmitter from '../messageBus/MessageBusEventEmitter';
 import JSONMessage from '../message/JSONMessage';
 import { error } from 'util';
+import { type } from 'os';
 
 export default class RabbitMQConnectionFacade implements ConnectionFacade {
     private connection: Connection;
@@ -44,13 +45,24 @@ export default class RabbitMQConnectionFacade implements ConnectionFacade {
 
                     messagePool.set(msg.properties.messageId, msg);
 
-                    emitter.on('error', (error, messageId) => {
-                        channel.nack(messagePool.get(messageId));
+                    emitter.on('error', async (error: Error, messageId: string) => {
+                        await channel.nack(messagePool.get(messageId));
                         messagePool.delete(messageId);
                     });
 
-                    emitter.on('success', messageId => {
-                        channel.ack(messagePool.get(messageId));
+                    emitter.on('success', async (messageId: string, resultingMessages: Message[] | Message) => {
+                        await channel.ack(messagePool.get(messageId));
+
+                        if (resultingMessages !== undefined) {
+                            if (Array.isArray(resultingMessages)) {
+                                for (let message of resultingMessages) {
+                                    await this.publish(message);
+                                }
+                            } else if (resultingMessages instanceof Message) {
+                                await this.publish(resultingMessages);
+                            }
+                        }
+
                         messagePool.delete(messageId);
                     });
 
@@ -66,8 +78,23 @@ export default class RabbitMQConnectionFacade implements ConnectionFacade {
         });
     }
 
-    public publish(message: Message): Promise<void> {
-        return undefined;
+    public async publish(message: Message): Promise<void> {
+        const channel = await this.connection.createChannel();
+
+        channel.publish(
+            `mercury_main_message_bus`,
+            message.getDescriptor(),
+            Buffer.from(message.getSerializedContent()),
+            {
+                headers: { retryCount: 0 },
+                persistent: true,
+                messageId: message.getUUID(),
+                timestamp: new Date().getTime(),
+                appId: this.appName,
+            },
+        );
+
+        await channel.close();
     }
 
     public async subscribe(descriptor: string): Promise<void> {

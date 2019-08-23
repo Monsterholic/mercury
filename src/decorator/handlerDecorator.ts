@@ -17,8 +17,8 @@ export const handler = (messageDescriptor: string): MethodDecorator => {
         const decoratedFunction = async (...args: any[]): Promise<void> => {
             let message = args.find(arg => arg instanceof Message);
             try {
-                await original.apply(this, args);
-                MessageEmitter.getMessageEmitter().emit('success', message.getUUID());
+                let resultingEvents: Message[] = await original.apply(this, args);
+                MessageEmitter.getMessageEmitter().emit('success', message.getUUID(), resultingEvents);
             } catch (e) {
                 MessageEmitter.getMessageEmitter().emit('error', e, message.getUUID());
             }
