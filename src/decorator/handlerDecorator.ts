@@ -1,5 +1,6 @@
 import Mercury from '../Mercury';
 import MessageEmitter from '../messageBus/MessageBusEventEmitter';
+import Message from '../message/Message';
 
 export const handler = (messageDescriptor: string): MethodDecorator => {
     return (target, propertyKey: string, propertyDescriptor: PropertyDescriptor): PropertyDescriptor => {
@@ -14,10 +15,12 @@ export const handler = (messageDescriptor: string): MethodDecorator => {
 
         const original = propertyDescriptor.value;
         const decoratedFunction = async (...args: any[]): Promise<void> => {
+            let message = args.find(arg => arg instanceof Message);
             try {
                 await original.apply(this, args);
+                MessageEmitter.getMessageEmitter().emit('success', message.getUUID());
             } catch (e) {
-                MessageEmitter.getMessageEmitter().emit('error', e);
+                MessageEmitter.getMessageEmitter().emit('error', e, message.getUUID());
             }
         };
 

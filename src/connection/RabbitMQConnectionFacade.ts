@@ -33,27 +33,35 @@ export default class RabbitMQConnectionFacade implements ConnectionFacade {
 
         //Verificar possivel realocação desse trecho de codigo para a classe de "Bus especifica"
         let channel = await this.connection.createChannel();
-        const messagePull = new Map();
+        const messagePool = new Map();
 
         channel.consume(`${this.serviceName}_message_queue`, msg => {
             const emitter = MessageEmitter.getMessageEmitter();
 
             if (msg.properties.appId === this.appName) {
-                const descriptor = msg.fields.routingKey;
+                if (msg.properties.messageId) {
+                    const descriptor = msg.fields.routingKey;
 
-                messagePull.set(msg.properties.messageId, msg);
+                    messagePool.set(msg.properties.messageId, msg);
 
-                emitter.on('error', messageId => {
-                    channel.nack(msg);
-                });
+                    emitter.on('error', (error, messageId) => {
+                        channel.nack(messagePool.get(messageId));
+                        messagePool.delete(messageId);
+                    });
 
-                emitter.on('success', messageId => {
+                    emitter.on('success', messageId => {
+                        channel.ack(messagePool.get(messageId));
+                        messagePool.delete(messageId);
+                    });
+
+                    const message = new JSONMessage(descriptor, msg.content, msg.properties.messageId);
+
+                    emitter.emit(descriptor, message);
+                } else {
                     channel.ack(msg);
-                });
-
-                const message = new JSONMessage(descriptor, msg.content, msg.properties.messageId);
-
-                emitter.emit(descriptor, message);
+                }
+            } else {
+                channel.ack(msg);
             }
         });
     }

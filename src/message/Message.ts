@@ -11,6 +11,10 @@ export default abstract class Message {
         this.creationDate = new Date();
     }
 
+    public getUUID(): string {
+        return this.uuid;
+    }
+
     public abstract getSerializedContent(): string;
 
     public getDescriptor(): string {
