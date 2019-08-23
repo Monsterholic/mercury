@@ -4,10 +4,13 @@
     "description": "Messaging Helper for Event Driven Systems",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
+    "files": [
+        "dist/**/*"
+    ],
     "scripts": {
         "test": "echo \"Error: no test specified\"",
         "lint": "eslint '*/**/*.{ts,tsx}' --fix",
-        "build": "tsc -p tsconfig.json"
+        "build": "tsc"
     },
     "repository": {
         "type": "git",
