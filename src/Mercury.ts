@@ -6,9 +6,27 @@ const RABBITQM = 'rabbitmq';
 
 export default class Mercury {
     private messageBus: AbstractMessageBus<ConnectionFacade>;
+    private appName: string;
+    private serviceName: string;
+    private brokerHostName: string;
+    private brokerUserName: string;
+    private brokerPassword: string;
 
-    public constructor(type: string) {
-        switch (type) {
+    public constructor(
+        brokerType: string,
+        brokerHostName: string,
+        brokerUserName: string,
+        brokerPassword: string,
+        appName: string,
+        serviceName: string,
+    ) {
+        this.appName = appName;
+        this.serviceName = serviceName;
+        this.brokerHostName = brokerHostName;
+        this.brokerUserName = brokerUserName;
+        this.brokerPassword = brokerPassword;
+
+        switch (brokerType) {
             case RABBITQM:
                 this.messageBus = new RabbitMQMessageBus();
                 break;
@@ -18,7 +36,13 @@ export default class Mercury {
         }
     }
 
-    public async start(hostName: string, userName: string, password: string, appName: string, serviceName: string) {
-        await this.messageBus.configure({ hostName, userName, password, appName, serviceName });
+    public async init(): Promise<void> {
+        await this.messageBus.configure({
+            brokerHostName: this.brokerHostName,
+            brokerUserName: this.brokerUserName,
+            brokerPassword: this.brokerPassword,
+            appName: this.appName,
+            serviceName: this.serviceName,
+        });
     }
 }

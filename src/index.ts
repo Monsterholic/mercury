@@ -2,12 +2,6 @@ import 'reflect-metadata';
 import Mercury from './Mercury';
 import './testeClass';
 
-export default class Index {
-    public static main(): void {
-        let mercury = new Mercury('rabbitmq');
+let mercury = new Mercury('rabbitmq', 'localhost', 'guest', 'guest', 'testApp', 'testService');
 
-        mercury.start('localhost', 'guest', 'guest', 'testeApp', 'testeService');
-    }
-}
-
-Index.main();
+mercury.init();

@@ -1,11 +1,11 @@
 {
-    "name": "event-bus",
+    "name": "Mercury",
     "version": "1.0.0",
-    "description": "Mercury Message Bus",
+    "description": "Messaging Helper for Event Driven Systems",
     "main": "index.js",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
-        "lint": "eslint '*/**/*.{js,ts,tsx}' --fix"
+        "lint": "eslint '*/**/*.{ts,tsx}' --fix"
     },
     "repository": {
         "type": "git",
@@ -13,7 +13,12 @@
     },
     "keywords": [
         "messaging",
-        "bus"
+        "bus",
+        "event",
+        "driven",
+        "architecture",
+        "microservices",
+        "comunication"
     ],
     "author": "cl3dson",
     "license": "ISC",
@@ -37,7 +42,6 @@
         "amqplib": "^0.5.3",
         "eslint-config-prettier": "^4.3.0",
         "eslint-plugin-prettier": "^3.1.0",
-        "inversify": "^5.0.1",
         "prettier": "^1.17.1",
         "reflect-metadata": "^0.1.13",
         "typescript": "^3.5.3"

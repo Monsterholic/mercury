@@ -3,8 +3,6 @@ import { connect, Connection } from 'amqplib';
 import Message from '../message/Message';
 import MessageEmitter from '../messageBus/MessageBusEventEmitter';
 import JSONMessage from '../message/JSONMessage';
-import { error } from 'util';
-import { type } from 'os';
 
 export default class RabbitMQConnectionFacade implements ConnectionFacade {
     private connection: Connection;
@@ -36,46 +34,55 @@ export default class RabbitMQConnectionFacade implements ConnectionFacade {
         let channel = await this.connection.createChannel();
         const messagePool = new Map();
 
-        channel.consume(`${this.serviceName}_message_queue`, msg => {
-            const emitter = MessageEmitter.getMessageEmitter();
+        channel.consume(
+            `${this.serviceName}_message_queue`,
+            async (msg): Promise<void> => {
+                const emitter = MessageEmitter.getMessageEmitter();
 
-            if (msg.properties.appId === this.appName) {
-                if (msg.properties.messageId) {
-                    const descriptor = msg.fields.routingKey;
+                if (msg.properties.appId === this.appName) {
+                    if (msg.properties.messageId) {
+                        const descriptor = msg.fields.routingKey;
 
-                    messagePool.set(msg.properties.messageId, msg);
+                        messagePool.set(msg.properties.messageId, msg);
 
-                    emitter.on('error', async (error: Error, messageId: string) => {
-                        await channel.nack(messagePool.get(messageId));
-                        messagePool.delete(messageId);
-                    });
+                        emitter.on(
+                            'error',
+                            async (error: Error, messageId: string): Promise<void> => {
+                                await channel.nack(messagePool.get(messageId));
+                                messagePool.delete(messageId);
+                            },
+                        );
 
-                    emitter.on('success', async (messageId: string, resultingMessages: Message[] | Message) => {
-                        await channel.ack(messagePool.get(messageId));
+                        emitter.on(
+                            'success',
+                            async (messageId: string, resultingMessages: Message[] | Message): Promise<void> => {
+                                await channel.ack(messagePool.get(messageId));
 
-                        if (resultingMessages !== undefined) {
-                            if (Array.isArray(resultingMessages)) {
-                                for (let message of resultingMessages) {
-                                    await this.publish(message);
+                                if (resultingMessages !== undefined) {
+                                    if (Array.isArray(resultingMessages)) {
+                                        for (let message of resultingMessages) {
+                                            await this.publish(message);
+                                        }
+                                    } else if (resultingMessages instanceof Message) {
+                                        await this.publish(resultingMessages);
+                                    }
                                 }
-                            } else if (resultingMessages instanceof Message) {
-                                await this.publish(resultingMessages);
-                            }
-                        }
 
-                        messagePool.delete(messageId);
-                    });
+                                messagePool.delete(messageId);
+                            },
+                        );
 
-                    const message = new JSONMessage(descriptor, msg.content, msg.properties.messageId);
+                        const message = new JSONMessage(descriptor, msg.content, msg.properties.messageId);
 
-                    emitter.emit(descriptor, message);
+                        emitter.emit(descriptor, message);
+                    } else {
+                        channel.ack(msg);
+                    }
                 } else {
                     channel.ack(msg);
                 }
-            } else {
-                channel.ack(msg);
-            }
-        });
+            },
+        );
     }
 
     public async publish(message: Message): Promise<void> {
