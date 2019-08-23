@@ -1,15 +1,16 @@
 {
-    "name": "Mercury",
+    "name": "mercury",
     "version": "1.0.0",
     "description": "Messaging Helper for Event Driven Systems",
     "main": "index.js",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
-        "lint": "eslint '*/**/*.{ts,tsx}' --fix"
+        "lint": "eslint '*/**/*.{ts,tsx}' --fix",
+        "build": "tsc -p tsconfig.json"
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/cl3dson/event-bus.git"
+        "url": "https://github.com/cl3dson/mercury.git"
     },
     "keywords": [
         "messaging",
@@ -23,9 +24,9 @@
     "author": "cl3dson",
     "license": "ISC",
     "bugs": {
-        "url": "https://github.com/cl3dson/event-bus/issues"
+        "url": "https://github.com/cl3dson/mercury/issues"
     },
-    "homepage": "https://github.com/cl3dson/event-bus#readme",
+    "homepage": "https://github.com/cl3dson/mercury#readme",
     "devDependencies": {
         "@types/node": "^10.14.9",
         "eslint": "^5.16.0",

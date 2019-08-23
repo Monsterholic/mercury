@@ -2,7 +2,7 @@ import Mercury from '../Mercury';
 import MessageEmitter from '../messageBus/MessageBusEventEmitter';
 import Message from '../message/Message';
 
-export const handler = (messageDescriptor: string): MethodDecorator => {
+const handler = (messageDescriptor: string): MethodDecorator => {
     return (target, propertyKey: string, propertyDescriptor: PropertyDescriptor): PropertyDescriptor => {
         if (!Reflect.hasMetadata('descriptors', Mercury.prototype.constructor)) {
             Reflect.defineMetadata('descriptors', [], Mercury.prototype.constructor);
@@ -30,3 +30,5 @@ export const handler = (messageDescriptor: string): MethodDecorator => {
         return propertyDescriptor;
     };
 };
+
+export default handler;
