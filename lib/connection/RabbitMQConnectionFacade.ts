@@ -148,8 +148,10 @@ export default class RabbitMQConnectionFacade implements ConnectionFacade {
     }
 
     public async subscribeAll(descriptors: string[]): Promise<void> {
-        for (let descriptor of descriptors) {
-            await this.subscribe(descriptor);
+        if (Array.isArray(descriptors)) {
+            for (let descriptor of descriptors) {
+                await this.subscribe(descriptor);
+            }
         }
     }
 }
