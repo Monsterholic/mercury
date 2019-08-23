@@ -14,9 +14,38 @@ if a handler returns a message object or an array of messages,all are published 
 
 Starting Mercury, passing the broker configuration values: 
 ```javascript
-let mercury = new Mercury('rabbitmq');
-mercury.start('localhost', 'guest', 'guest', 'testApp', 'testService');
+import Mercury from 'mercury';
+import './ExampleHandlerClass';
 
-
+let mercury = new Mercury('rabbitmq', 'localhost', 'guest', 'guest', 'testApp', 'testService');
+mercury.init();
 
 ```
+Now you can define you own class with as many handlers as needed:
+
+```javascript
+import { handler,JSONMessage } from 'mercury';
+
+export default class ExampleHandlerClass {
+
+    // define the message/event that this handler will subscribe, 
+    // just use the decorator @handler passing the message descriptor
+    
+    @handler('used-created')
+    public handler() {
+        console.log('A user has been created');
+        throw new Error('Erro teste');
+    }
+
+    @handler('order-created')
+    public handler2() {
+        console.log('Something has been ordered');
+
+        //your business rule ...
+
+        //return a new message, or array of message if needed
+        return new JSONMessage('coisaRegistrada', { teste: 'teste' }); 
+    }
+}
+```
+
