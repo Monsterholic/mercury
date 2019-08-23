@@ -25,7 +25,28 @@
         "microservices",
         "comunication"
     ],
-    "author": "cl3dson",
+    "author": {
+        "name": "cl3dson",
+        "email": "f.cl3dson@gmail.com",
+        "url": "https://github.com/cl3dson"
+    },
+    "contributors": [
+        {
+            "name": "darlison-alves",
+            "email": "",
+            "url": "https://github.com/darlison-alves"
+        },
+        {
+            "name": "RomuloQ",
+            "email": "romuloqueiroz100@gmail.com",
+            "url": "https://github.com/RomuloQ"
+        },
+        {
+            "name": "noamcore",
+            "email": "",
+            "url": "https://github.com/noamcore"
+        }
+    ],
     "license": "ISC",
     "bugs": {
         "url": "https://github.com/cl3dson/mercury/issues"
