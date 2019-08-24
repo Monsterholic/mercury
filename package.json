@@ -8,7 +8,7 @@
         "dist/**/*"
     ],
     "scripts": {
-        "test": "echo \"Error: no test specified\"",
+        "test": "jest --detectOpenHandles",
         "lint": "eslint '*/**/*.{ts,tsx}' --fix",
         "build": "tsc"
     },
@@ -54,23 +54,27 @@
     },
     "homepage": "https://github.com/cl3dson/mercury#readme",
     "devDependencies": {
+        "@babel/core": "^7.5.5",
+        "@babel/preset-env": "^7.5.5",
+        "@babel/preset-typescript": "^7.3.3",
+        "@types/jest": "^24.0.18",
         "@types/node": "^10.14.9",
+        "babel-jest": "^24.9.0",
         "eslint": "^5.16.0",
         "eslint-config-airbnb-base": "^13.1.0",
+        "eslint-config-prettier": "^4.3.0",
         "eslint-plugin-import": "^2.17.2",
+        "eslint-plugin-prettier": "^3.1.0",
         "husky": "^3.0.3",
+        "jest": "^24.9.0",
         "mocha": "^6.1.4",
-        "pretty-quick": "^1.11.1"
+        "prettier": "^1.18.2",
+        "pretty-quick": "^1.11.1",
+        "ts-jest": "^24.0.2"
     },
     "dependencies": {
         "@types/amqplib": "^0.5.11",
-        "@typescript-eslint/eslint-plugin": "^1.9.0",
-        "@typescript-eslint/parser": "^1.9.0",
         "amqplib": "^0.5.3",
-        "eslint-config-prettier": "^4.3.0",
-        "eslint-plugin-prettier": "^3.1.0",
-        "nyc": "^14.1.1",
-        "prettier": "^1.17.1",
         "reflect-metadata": "^0.1.13",
         "typescript": "^3.5.3"
     },
@@ -78,5 +82,24 @@
         "hooks": {
             "pre-commit": "tsc && pretty-quick --staged"
         }
+    },
+    "jest": {
+        "collectCoverageFrom": [
+            "src/**/*.{js,jsx,ts,tsx}",
+            "!src/**/*.d.ts"
+        ],
+        "transform": {
+            ".(ts|tsx)": "ts-jest"
+        },
+        "testRegex": "(/tests/.*|(\\.|/)(test|spec))\\.[jt]sx?$",
+        "moduleNameMapper": {
+            "^mercury-messenger(.*)$": "<rootDir>/lib$1"
+        }
+    },
+    "babel": {
+        "presets": [
+            "@babel/preset-env",
+            "@babel/preset-typescript"
+        ]
     }
 }

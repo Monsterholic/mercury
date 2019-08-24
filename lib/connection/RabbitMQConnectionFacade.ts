@@ -32,20 +32,16 @@ export default class RabbitMQConnectionFacade {
     }
 
     public async connect(hostname: string, username: string, password: string): Promise<void> {
-        try {
-            this.connection = await connect({
-                protocol: 'amqp',
-                hostname,
-                port: 5672,
-                username,
-                password,
-            });
+        this.connection = await connect({
+            protocol: 'amqp',
+            hostname,
+            port: 5672,
+            username,
+            password,
+        });
 
-            this.channel = await this.connection.createChannel();
-            await this.setUp();
-        } catch (e) {
-            console.log(e);
-        }
+        this.channel = await this.connection.createChannel();
+        await this.setUp();
 
         const messagePool = new Map<string, ConsumeMessage>();
         const emitter = MessageEmitter.getMessageEmitter();
