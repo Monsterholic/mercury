@@ -1,10 +1,9 @@
-import ConnectionFacade from './ConnectionFacade';
 import { connect, Connection, ConsumeMessage } from 'amqplib';
 import Message from '../message/Message';
 import MessageEmitter from '../messageBus/MessageBusEventEmitter';
 import JSONMessage from '../message/JSONMessage';
 
-export default class RabbitMQConnectionFacade implements ConnectionFacade {
+export default class RabbitMQConnectionFacade {
     private connection: Connection;
     private readonly serviceName: string;
     private readonly appName: string;

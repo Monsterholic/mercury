@@ -1,3 +1,11 @@
+export interface OptionsMap {
+    appName: string;
+    brokerHostName: string;
+    brokerUserName: string;
+    brokerPassword: string;
+    serviceName: string;
+}
+
 export default interface MessageBus {
-    configure(name: string): Promise<void>;
+    configure(args: OptionsMap): Promise<void>;
 }

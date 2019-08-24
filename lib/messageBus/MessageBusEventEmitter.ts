@@ -7,7 +7,7 @@ export default class MessageEmitter extends EventEmitter {
         super();
     }
 
-    emit(eventName: string | symbol, ...args: any[]): boolean {
+    public emit(eventName: string | symbol, ...args: any[]): boolean {
         return super.emit(eventName, args);
     }
 

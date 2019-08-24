@@ -1,11 +1,10 @@
 import RabbitMQMessageBus from './messageBus/RabbitMQMessageBus';
-import ConnectionFacade from './connection/ConnectionFacade';
-import AbstractMessageBus from './messageBus/AbstractMessageBus';
+import MessageBus from './messageBus/MessageBus';
 
 const RABBITQM = 'rabbitmq';
 
 export default class Mercury {
-    private messageBus: AbstractMessageBus<ConnectionFacade>;
+    private messageBus: MessageBus;
     private appName: string;
     private serviceName: string;
     private brokerHostName: string;
