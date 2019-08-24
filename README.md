@@ -1,6 +1,6 @@
 ![CircleCI](https://img.shields.io/circleci/build/github/cl3dson/mercury/master)
-![npm](https://img.shields.io/npm/v/mercury-messenger)
-![npm](https://img.shields.io/npm/dw/mercury-messenger)
+[![Npm][badgenpm]][npm]
+[![Npm][npmdown]][npm]
 
 # Mercury
 
@@ -78,3 +78,7 @@ published into the main message bus for possible use by others services.
 -   Implement some mechanism to ensure that the publishing of new messages happens only when some pre-registered conditions have
     been succeeded. (Like publishing the 'order-created' message only when client code commit the transaction to 'order-database' successfully)
 -   Support to more message brokers like Redis, Apache ActiveMQ, Apache Kafka.
+
+[npm]: https://www.npmjs.com/package/mercury-messenger
+[badgenpm]: https://img.shields.io/npm/v/mercury-messenger
+[npmdown]: https://img.shields.io/npm/dw/mercury-messenger
