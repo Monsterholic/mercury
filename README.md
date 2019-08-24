@@ -1,3 +1,5 @@
+[![CircleCI](https://circleci.com/gh/cl3dson/mercury/tree/master.svg?style=svg)](https://circleci.com/gh/cl3dson/mercury/tree/master)
+
 # Mercury
 
 Mercury is a tool for managing inter-service comunication in distributed systems based in EDA(Event Driven Architecture)
