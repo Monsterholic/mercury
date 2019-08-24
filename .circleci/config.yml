@@ -35,7 +35,7 @@ jobs:
                   at: ~/mercury
             - run:
                   name: build package files
-                  command: npm build
+                  command: npm run build
             - run:
                   name: Authenticate with registry
                   command: echo "//registry.npmjs.org/:_authToken=$npm_TOKEN" > ~/mercury/.npmrc
