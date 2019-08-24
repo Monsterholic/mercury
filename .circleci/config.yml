@@ -16,6 +16,7 @@ jobs:
             - restore_cache:
                   keys:
                       - v1-dependencies-{{ checksum "package.json" }}
+                      - v1-dependencies-
             - run: npm install
             - run:
                   name: Run tests
@@ -27,8 +28,33 @@ jobs:
             - persist_to_workspace:
                   root: ~/mercury
                   paths: .
+    deploy:
+        <<: *defaults
+        steps:
+            - attach_workspace:
+                  at: ~/mercury
+            - run:
+                  name: Authenticate with registry
+                  command: echo "//registry.npmjs.org/:_authToken=$npm_TOKEN" > ~/mercury/.npmrc
+            - run:
+                  name: Publish package
+                  command: npm publish
+
 workflows:
     version: 2
-    tests:
+    test-deploy:
         jobs:
-            - test
+            - test:
+                  filters:
+                      tags:
+                          only: /^v.*/
+                      branches:
+                          only: /master/
+            - deploy:
+                  requires:
+                      - test
+                  filters:
+                      tags:
+                          only: /^v.*/
+                      branches:
+                          only: /master/
