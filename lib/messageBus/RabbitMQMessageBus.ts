@@ -13,4 +13,8 @@ export default class RabbitMQMessageBus implements MessageBus {
         const descriptors: string[] = Reflect.getMetadata('descriptors', Mercury);
         await this.connectionFacade.subscribeAll(descriptors);
     }
+
+    public async terminate(): Promise<void> {
+        await this.connectionFacade.disconnect();
+    }
 }
