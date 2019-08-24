@@ -1,4 +1,6 @@
-[![CircleCI](https://circleci.com/gh/cl3dson/mercury/tree/master.svg?style=svg)](https://circleci.com/gh/cl3dson/mercury/tree/master)
+![CircleCI](https://img.shields.io/circleci/build/github/cl3dson/mercury/master)
+![npm](https://img.shields.io/npm/v/mercury-messenger)
+![npm](https://img.shields.io/npm/dw/mercury-messenger)
 
 # Mercury
 
