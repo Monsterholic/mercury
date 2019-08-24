@@ -13,6 +13,13 @@ export default class RabbitMQConnectionFacade {
         this.appName = appName;
     }
 
+    public async disconnect(): Promise<void> {
+        if (this.connection) {
+            await this.connection.close();
+            this.connection = undefined;
+        }
+    }
+
     public async connect(hostname: string, username: string, password: string): Promise<void> {
         //TODO colocar handlers de eventos para caso a conexao caia
         try {

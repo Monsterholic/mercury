@@ -44,4 +44,8 @@ export default class Mercury {
             serviceName: this.serviceName,
         });
     }
+
+    public async terminate(): Promise<void> {
+        await this.messageBus.terminate();
+    }
 }
