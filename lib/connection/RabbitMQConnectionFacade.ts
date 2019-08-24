@@ -47,7 +47,9 @@ export default class RabbitMQConnectionFacade {
                         emitter.on(
                             'error',
                             async ([error, messageId]: [Error, string]): Promise<void> => {
-                                await channel.nack(messagePool.get(messageId));
+                                let message: ConsumeMessage = messagePool.get(messageId);
+                                message.properties.expiration = 1000;
+                                await channel.nack(message, false, false);
                                 messagePool.delete(messageId);
                             },
                         );
