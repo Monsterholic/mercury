@@ -7,6 +7,10 @@ export default class MessageEmitter extends EventEmitter {
         super();
     }
 
+    emit(eventName: string | symbol, ...args: any[]): boolean {
+        return super.emit(eventName, args);
+    }
+
     public static getMessageEmitter(): MessageEmitter {
         if (!MessageEmitter.emitter) {
             MessageEmitter.emitter = new MessageEmitter();

@@ -1,5 +1,5 @@
 import ConnectionFacade from './ConnectionFacade';
-import { connect, Connection } from 'amqplib';
+import { connect, Connection, ConsumeMessage } from 'amqplib';
 import Message from '../message/Message';
 import MessageEmitter from '../messageBus/MessageBusEventEmitter';
 import JSONMessage from '../message/JSONMessage';
@@ -36,7 +36,7 @@ export default class RabbitMQConnectionFacade implements ConnectionFacade {
 
         channel.consume(
             `${this.serviceName}_message_queue`,
-            async (msg): Promise<void> => {
+            async (msg: ConsumeMessage): Promise<void> => {
                 const emitter = MessageEmitter.getMessageEmitter();
 
                 if (msg.properties.appId === this.appName) {
@@ -73,7 +73,6 @@ export default class RabbitMQConnectionFacade implements ConnectionFacade {
                         );
 
                         const message = new JSONMessage(descriptor, msg.content, msg.properties.messageId);
-
                         emitter.emit(descriptor, message);
                     } else {
                         channel.ack(msg);
