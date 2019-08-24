@@ -46,7 +46,7 @@ export default class RabbitMQConnectionFacade {
 
                         emitter.on(
                             'error',
-                            async (error: Error, messageId: string): Promise<void> => {
+                            async ([error, messageId]: [Error, string]): Promise<void> => {
                                 await channel.nack(messagePool.get(messageId));
                                 messagePool.delete(messageId);
                             },
@@ -54,7 +54,7 @@ export default class RabbitMQConnectionFacade {
 
                         emitter.on(
                             'success',
-                            async (messageId: string, resultingMessages: Message[] | Message): Promise<void> => {
+                            async ([messageId, resultingMessages]: [string, Message[] | Message]): Promise<void> => {
                                 await channel.ack(messagePool.get(messageId));
 
                                 if (resultingMessages !== undefined) {
