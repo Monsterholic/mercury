@@ -13,7 +13,7 @@ const handler = (messageDescriptor: string): MethodDecorator => {
         Reflect.defineMetadata('descriptors', descriptors, Mercury.prototype.constructor);
 
         const original = propertyDescriptor.value;
-        const decoratedFunction = async (...args: Message[]): Promise<void> => {
+        const decoratedFunction = async (args: Message[]): Promise<void> => {
             let message = args.find((arg: Message): boolean => arg instanceof Message);
             try {
                 let resultingEvents: Message[] = await original.apply(this, args);
