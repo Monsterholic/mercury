@@ -24,7 +24,6 @@ const handler = (messageDescriptor: string): MethodDecorator => {
         };
 
         propertyDescriptor.value = decoratedFunction;
-
         MessageEmitter.getMessageEmitter().addListener(messageDescriptor, decoratedFunction);
 
         return propertyDescriptor;
