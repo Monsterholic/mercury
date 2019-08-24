@@ -29,6 +29,6 @@ jobs:
                   paths: .
 workflows:
     version: 2
-    only_test:
+    tests:
         jobs:
             - test
