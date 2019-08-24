@@ -17,6 +17,8 @@ export default abstract class Message {
         return this.uuid;
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    public abstract getContent(): any;
     public abstract getSerializedContent(): string;
 
     public getDescriptor(): string {
