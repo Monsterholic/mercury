@@ -19,9 +19,20 @@ Starting Mercury, passing the broker configuration values:
 import Mercury from 'mercury-messenger';
 import './testeHandler';
 
-let merc = new Mercury('rabbitmq', 'localhost', 'guest', 'guest', 'testApp', 'testService');
+let merc = new Mercury('rabbitmq', 'localhost', 'user', 'password', 'testApp', 'testService');
 merc.init();
 ```
+
+###Parameters
+
+-   brokerType - Here we define the message broker used (only supports rabbitmq for now)
+-   brokerAddress - Message broker address
+-   brokerUser - message broker admin credentials
+-   brokerPassword - message broker password por provided user
+-   ApplicationId - A descriptor for your entire distributed system (only services defined with the same 'app id' communicate with each other)
+-   ServiceId - A descriptor for the current service
+
+## Handlers classes
 
 Now you can define you own class with as many handlers as needed:
 
@@ -43,7 +54,7 @@ class testeHandler {
         //your business rule ...
 
         //return a new message, or array of message if needed
-        return new JSONMessage('coisaRegistrada', { teste: 'teste' });
+        return new JSONMessage('product-purchased', { test: 'data' });
     }
 }
 ```
