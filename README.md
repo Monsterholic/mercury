@@ -69,7 +69,8 @@ published into the main message bus for possible use by others services.
 
 ## TODO
 
--   Register all messages received and published to external databases like MongoDB or Redis
+-   Exponential retry strategy with max retry using DLE (dead letter)
+-   Register all messages received and published to external databases like MongoDB or Redis (event-store)
 -   Implement some mechanism to ensure that the publishing of new messages happens only when some pre-registered conditions have
     been succeeded. (Like publishing the 'order-created' message only when client code commit the transaction to 'order-database' successfully)
 -   Support to more message brokers like Redis, Apache ActiveMQ, Apache Kafka.
