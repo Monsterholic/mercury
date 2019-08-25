@@ -17,7 +17,7 @@ if a handler returns a message object or an array of messages,all are published 
 
 ## Quick Example
 
-Starting Mercury, passing the broker configuration values:
+Start Mercury, passing the broker configuration values:
 
 ```javascript
 import Mercury from 'mercury-messenger';

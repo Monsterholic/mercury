@@ -23,7 +23,8 @@
         "driven",
         "architecture",
         "microservices",
-        "comunication"
+        "communication",
+        "rabbitmq"
     ],
     "author": {
         "name": "cl3dson",
