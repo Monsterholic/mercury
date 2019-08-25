@@ -1,20 +1,29 @@
-import { connect, Connection, ConsumeMessage } from 'amqplib';
+import { Channel, connect, Connection, ConsumeMessage } from 'amqplib';
 import Message from '../message/Message';
 import MessageEmitter from '../messageBus/MessageBusEventEmitter';
 import JSONMessage from '../message/JSONMessage';
 
 export default class RabbitMQConnectionFacade {
+    private readonly main_bus = 'mercury_bus';
     private connection: Connection;
-    private readonly serviceName: string;
+    private channel: Channel;
+    private readonly exchange: string;
+    private readonly deadLetterExchange: string;
+    private readonly queue: string;
+    private readonly retryQueue: string;
     private readonly appName: string;
 
     public constructor(serviceName: string, appName: string) {
-        this.serviceName = serviceName;
+        this.exchange = serviceName;
+        this.deadLetterExchange = `${this.exchange}_dlx`;
+        this.queue = `${serviceName}_queue`;
+        this.retryQueue = `${this.queue}_retry`;
         this.appName = appName;
     }
 
     public async disconnect(): Promise<void> {
         if (this.connection) {
+            await this.channel.close();
             await this.connection.close();
             this.connection = undefined;
         }
@@ -31,17 +40,16 @@ export default class RabbitMQConnectionFacade {
                 password,
             });
 
+            this.channel = await this.connection.createChannel();
             await this.setUp();
         } catch (e) {
             console.log(e);
         }
 
-        //Verificar possivel realocação desse trecho de codigo para a classe de "Bus especifica"
-        let channel = await this.connection.createChannel();
         const messagePool = new Map();
 
-        channel.consume(
-            `${this.serviceName}_message_queue`,
+        this.channel.consume(
+            `${this.queue}`,
             async (msg: ConsumeMessage): Promise<void> => {
                 const emitter = MessageEmitter.getMessageEmitter();
 
@@ -53,10 +61,14 @@ export default class RabbitMQConnectionFacade {
 
                         emitter.on(
                             'error',
-                            async ([error, messageId]: [Error, string]): Promise<void> => {
+                            async ([error, messageId, mercuryMessage]: [Error, string, Message]): Promise<void> => {
                                 let message: ConsumeMessage = messagePool.get(messageId);
-                                message.properties.expiration = 1000;
-                                await channel.nack(message, false, false);
+                                await this.channel.ack(message);
+
+                                let retries = message.properties.headers.retries
+                                    ? message.properties.headers.retries + 1
+                                    : 0;
+                                await this.publish(mercuryMessage, this.deadLetterExchange, retries);
                                 messagePool.delete(messageId);
                             },
                         );
@@ -64,7 +76,7 @@ export default class RabbitMQConnectionFacade {
                         emitter.on(
                             'success',
                             async ([messageId, resultingMessages]: [string, Message[] | Message]): Promise<void> => {
-                                await channel.ack(messagePool.get(messageId));
+                                await this.channel.ack(messagePool.get(messageId));
 
                                 if (resultingMessages !== undefined) {
                                     if (Array.isArray(resultingMessages)) {
@@ -83,75 +95,61 @@ export default class RabbitMQConnectionFacade {
                         const message = new JSONMessage(descriptor, msg.content, msg.properties.messageId);
                         emitter.emit(descriptor, message);
                     } else {
-                        channel.ack(msg);
+                        this.channel.ack(msg);
                     }
                 } else {
-                    channel.ack(msg);
+                    this.channel.ack(msg);
                 }
             },
         );
     }
 
-    public async publish(message: Message): Promise<void> {
+    public async publish(message: Message, alternativeExchange: string = null, retries: number = 0): Promise<void> {
         const channel = await this.connection.createChannel();
+        const exchange = alternativeExchange ? alternativeExchange : this.main_bus;
 
-        channel.publish(
-            `mercury_main_message_bus`,
-            message.getDescriptor(),
-            Buffer.from(message.getSerializedContent()),
-            {
-                headers: { retryCount: 0 },
-                persistent: true,
-                messageId: message.getUUID(),
-                timestamp: new Date().getTime(),
-                appId: this.appName,
-            },
-        );
+        channel.publish(exchange, message.getDescriptor(), Buffer.from(message.getSerializedContent()), {
+            headers: { retries },
+            persistent: true,
+            messageId: message.getUUID(),
+            timestamp: new Date().getTime(),
+            appId: this.appName,
+        });
 
         await channel.close();
     }
 
     public async subscribe(descriptor: string): Promise<void> {
-        let channel = await this.connection.createChannel();
-        await channel.bindQueue(`${this.serviceName}_message_queue`, `${this.serviceName}_exchange`, descriptor);
-        await channel.close();
+        await this.channel.bindQueue(this.queue, this.exchange, descriptor);
     }
 
     private async setUp(): Promise<void> {
-        let channel = await this.connection.createChannel();
-
         /* Creating Exchanges and queues */
-        await channel.assertExchange('mercury_main_message_bus', 'fanout', {
+        await this.channel.assertExchange(this.main_bus, 'fanout', {
             durable: true,
             autoDelete: false,
         });
-        await channel.assertExchange(`${this.serviceName}_exchange`, 'direct', {
+        await this.channel.assertExchange(this.exchange, 'direct', {
             durable: true,
             autoDelete: false,
         });
-        await channel.assertExchange(`${this.serviceName}_exchange_dead_letter`, 'fanout', {
+        await this.channel.assertExchange(this.deadLetterExchange, 'fanout', {
             durable: true,
             autoDelete: false,
         });
-        await channel.assertQueue(`${this.serviceName}_message_queue`, {
+        await this.channel.assertQueue(this.queue, {
             durable: true,
             autoDelete: false,
-            deadLetterExchange: `${this.serviceName}_exchange_dead_letter`,
         });
-        await channel.assertQueue(`${this.serviceName}_message_queue_dead_letter`, {
+        await this.channel.assertQueue(this.retryQueue, {
             durable: true,
             autoDelete: false,
-            deadLetterExchange: `${this.serviceName}_exchange`,
+            deadLetterExchange: this.exchange,
         });
 
         /* Creating the basic bindings */
-        await channel.bindExchange('mercury_main_message_bus', `${this.serviceName}_exchange`, '');
-        await channel.bindQueue(
-            `${this.serviceName}_message_queue_dead_letter`,
-            `${this.serviceName}_exchange_dead_letter`,
-            '',
-        );
-        await channel.close();
+        await this.channel.bindExchange('mercury_main_message_bus', this.exchange, '');
+        await this.channel.bindQueue(this.retryQueue, this.deadLetterExchange, '');
     }
 
     public async subscribeAll(descriptors: string[]): Promise<void> {

@@ -19,7 +19,7 @@ const handler = (messageDescriptor: string): MethodDecorator => {
                 let resultingEvents: Message[] = await original.apply(this, args);
                 MessageEmitter.getMessageEmitter().emit('success', message.getUUID(), resultingEvents);
             } catch (e) {
-                MessageEmitter.getMessageEmitter().emit('error', e, message.getUUID());
+                MessageEmitter.getMessageEmitter().emit('error', e, message.getUUID(), message);
             }
         };
 
