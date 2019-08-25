@@ -148,7 +148,7 @@ export default class RabbitMQConnectionFacade {
         });
 
         /* Creating the basic bindings */
-        await this.channel.bindExchange('mercury_main_message_bus', this.exchange, '');
+        await this.channel.bindExchange(this.main_bus, this.exchange, '');
         await this.channel.bindQueue(this.retryQueue, this.deadLetterExchange, '');
     }
 
