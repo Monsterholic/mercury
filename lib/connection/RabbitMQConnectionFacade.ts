@@ -125,8 +125,6 @@ export default class RabbitMQConnectionFacade {
             appId: this.appName,
             expiration: delay ? delay : undefined,
         });
-
-        await this.channel.close();
     }
 
     public async subscribe(descriptor: string): Promise<void> {
