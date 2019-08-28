@@ -69,10 +69,7 @@ export default class RabbitMQConnectionFacade {
                                     ? message.properties.headers.retries + 1
                                     : 0;
 
-                                if (retries <= 8) {
-                                    let delay = Math.pow(2, retries) * 1000;
-                                    await this.publish(mercuryMessage, this.deadLetterExchange, retries, delay);
-                                }
+                                if (retries <= 8) await this.publish(mercuryMessage, this.deadLetterExchange, retries);
 
                                 messagePool.delete(messageId);
                             },
@@ -109,21 +106,15 @@ export default class RabbitMQConnectionFacade {
         );
     }
 
-    public async publish(
-        message: Message,
-        alternativeExchange: string = null,
-        retries: number = 0,
-        delay: number = 0,
-    ): Promise<void> {
+    public async publish(message: Message, alternativeExchange: string = null, retryCount: number = 0): Promise<void> {
         const exchange = alternativeExchange ? alternativeExchange : this.main_bus;
 
         this.channel.publish(exchange, message.getDescriptor(), Buffer.from(message.getSerializedContent()), {
-            headers: { retries },
+            headers: { retries: retryCount },
             persistent: true,
             messageId: message.getUUID(),
             timestamp: new Date().getTime(),
             appId: this.appName,
-            expiration: delay ? delay : undefined,
         });
     }
 
@@ -153,6 +144,9 @@ export default class RabbitMQConnectionFacade {
             durable: true,
             autoDelete: false,
             deadLetterExchange: this.exchange,
+            arguments: {
+                'x-message-ttl': 60000,
+            },
         });
 
         /* Creating the basic bindings */
