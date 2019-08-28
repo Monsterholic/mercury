@@ -55,7 +55,10 @@ export default class RabbitMQConnectionFacade {
                 let message: ConsumeMessage = messagePool.get(messageId);
                 messagePool.delete(messageId);
 
-                if (message.properties.headers['x-death'] && message.properties.headers['x-death'].length <= 8) {
+                if (
+                    !message.properties.headers['x-death'] ||
+                    (message.properties.headers['x-death'] && message.properties.headers['x-death'].length <= 8)
+                ) {
                     await this.channel.nack(message, false, false);
                 }
             },
