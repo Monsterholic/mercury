@@ -63,11 +63,14 @@ export default class RabbitMQConnectionFacade {
                             'error',
                             async ([error, messageId, mercuryMessage]: [Error, string, Message]): Promise<void> => {
                                 let message: ConsumeMessage = messagePool.get(messageId);
-
-                                if (message.properties.headers['x-death'].length <= 8)
-                                    this.channel.nack(message, false, false);
-
                                 messagePool.delete(messageId);
+
+                                if (
+                                    message.properties.headers['x-death'] &&
+                                    message.properties.headers['x-death'].length <= 8
+                                ) {
+                                    await this.channel.nack(message, false, false);
+                                }
                             },
                         );
 
