@@ -2,7 +2,7 @@ import Mercury from '../Mercury';
 import MessageEmitter from '../messageBus/MessageBusEventEmitter';
 import Message from '../message/Message';
 
-const handler = (messageDescriptor: string): MethodDecorator => {
+const handler = (messageDescriptor: string, maxRetries: number): MethodDecorator => {
     return (target, propertyKey: string, propertyDescriptor: PropertyDescriptor): PropertyDescriptor => {
         if (!Reflect.hasMetadata('descriptors', Mercury.prototype.constructor)) {
             Reflect.defineMetadata('descriptors', [], Mercury.prototype.constructor);
@@ -19,7 +19,7 @@ const handler = (messageDescriptor: string): MethodDecorator => {
                 let resultingEvents: Message[] = await original.apply(this, args);
                 MessageEmitter.getMessageEmitter().emit('success', message.getUUID(), resultingEvents);
             } catch (e) {
-                MessageEmitter.getMessageEmitter().emit('error', e, message.getUUID(), message);
+                MessageEmitter.getMessageEmitter().emit('error', e, message.getUUID(), message, maxRetries);
             }
         };
 
