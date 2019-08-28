@@ -145,14 +145,18 @@ export default class RabbitMQConnectionFacade {
             autoDelete: false,
             deadLetterExchange: this.deadLetterExchange,
         });
-        await this.channel.assertQueue(this.retryQueue, {
-            durable: true,
-            autoDelete: false,
-            deadLetterExchange: this.exchange,
-            arguments: {
-                'x-message-ttl': this.delayRetry,
-            },
-        });
+        try {
+            await this.channel.assertQueue(this.retryQueue, {
+                durable: true,
+                autoDelete: false,
+                deadLetterExchange: this.exchange,
+                arguments: {
+                    'x-message-ttl': this.delayRetry * 10000,
+                },
+            });
+        } catch (e) {
+            throw e;
+        }
 
         /* Creating the basic bindings */
         await this.channel.bindExchange(this.exchange, this.main_bus, '');
