@@ -4,51 +4,41 @@
 
 # Mercury
 
-Mercury is a tool for managing inter-service comunication in distributed systems based in EDA(Event Driven Architecture)
-writen in NodeJs.Mercury set-up all underling configurations of message broker, queues, exchanges, binds, topics, etc.
-With Mercury your team can focus on writing more code related with your business and less
-code related with messaging infra-structure.
+Mercury is a tool for managing inter-service communication in distributed systems based in EDA (Event Driven Architecture).
+Mercury is intended for systems that relies in message brokers for asynchronous messaging.All Broker based configuration
+needed to process messages, like queues, topics, binds, listeners, handlers, retry are set up by Mercury under the hood
+and decoupled from your application.Mercury main purpose is for developers use their times to write business logic rather
+than messaging or broker specific code.
 
 ## How it works
 
-Mercury uses the publish/subscribe pattern for deliver messages to the correct services.You application just need to
-define the handlers functions for interested "events" or messages that occurs within the system ecosystem.In adition,
-if a handler returns a message object or an array of messages,all are published in the system ecosystem.
+Mercury uses the publish/subscribe pattern for deliver messages to the correct service.You application just need to
+define the handlers functions for interested "events" or messages that occurs within the message ecosystem.
 
 ## Quick Example
 
-Start Mercury, passing the broker configuration values:
+Start Mercury, providing the broker configuration values in your index file:
 
 ```javascript
 import Mercury from 'mercury-messenger';
-import './testeHandler';
+import './testHandler';
 
-let merc = new Mercury('rabbitmq', 'localhost', 'user', 'password', 'testApp', 'testService');
-merc.init();
+let mercury = new Mercury('rabbitmq', 'localhost', 'user', 'password', 'testApp', 'testService');
+mercury.init();
 ```
 
-### Parameters
-
--   brokerType - Here we define the message broker used (only supports rabbitmq for now)
--   brokerAddress - Message broker address
--   brokerUser - message broker admin credentials
--   brokerPassword - message broker password por provided user
--   ApplicationId - A descriptor for your entire distributed system (only services defined with the same 'app id' communicate with each other)
--   ServiceId - A descriptor for the current service
-
-## Handler classes
-
-Now you can define you own class with as many handlers as needed,Just use the 'handler' decorator do subscribe to new messages.
-When the intended message appear in the system's message ecosystem, the handler function will be called.
+Now, define your own class with as many handlers are needed for your service:
 
 ```javascript
-import { handler JSONMessage } from 'mercury-messenger';
+import { handler, JSONMessage } from 'mercury-messenger';
 
-class testeHandler {
-    @handler('used-created')
+class testHandler {
+    @handler('user-created', 30)
     handler1(msg) {
         console.log('A user has been created');
-        throw new Error('somethin gone wrong');
+
+        // if a error occurs during execution, this message will be retried 30 times
+        throw new Error('something gone wrong');
     }
 
     @handler('order-created')
@@ -64,11 +54,78 @@ class testeHandler {
 }
 ```
 
+### Mercury Configuration
+
+```javascript
+let mercury = new Mercury(
+    appName: string,
+    brokerHostName: string,
+    brokerUserName: string,
+    brokerPassword: string,
+    serviceName: string,
+    retryDelay: number
+);
+```
+
+-   AppName - A descriptor/name for your entire distributed system (only services defined with the same 'appName' communicate with each other)
+-   serviceName - A descriptor/name for the current service
+-   brokerType - Here we define the message broker used (only rabbitmq supported for now)
+-   brokerAddress - Message broker address
+-   brokerUser - message broker admin credentials
+-   brokerPassword - message broker password por provided user
+-   retryDelay (optional) - the default delay in seconds during retries (default 60)
+
+### Mercury Initialization
+
+```
+mercury.init();
+```
+
+The init method start the process to configure broker with the provided configuration and
+registering handlers as well.
+
+### Handlers
+
+Any function can become a messageHandler, just use @handler as decorator providing a message name/descriptor and optionally
+a max number of retries for the handler.
+
+#### Errors
+
 If an error is thown inside a handler decorated function, the message will not be acknowledged in the message broker,and will be
-retried some time later.In future implementations will be possible to set the number of retries and the delay time.
+retried some time later.
+
+```javascript
+    @handler('user-created', 30)
+    handler1(msg) {
+        console.log('A user has been created');
+
+        // if a error occurs during execution, this message will be retried 30 times
+        throw new Error('something gone wrong');
+    }
+```
+
+The second parameter to @handler decorator is optional,it define how many times mercury will try to processs this message.If no
+value, message will not be retried.Be careful with database logic or external services invocation here, Always find some way to
+rollback or revert previous operations before handler finish if they aren't idempotent.
+You can also define the delay between retries in Mercury constructor.
+
+#### Succeeded Handlers
 
 If there is no errors during handler execution, then any Message or array of Messages returned by the handler function will be
-published into the main message bus for possible use by others services.
+published into the system messaging ecosystem and possibly consumed by others subscribers services.
+
+```
+ @handler('order-created')
+    handler2(msg) {
+        console.log('Something has been ordered');
+
+        let msgContent = msg.getContent();
+        //your business rule ...
+
+        //return a new message, or array of message if needed
+        return new JSONMessage('product-purchased', { test: 'data' });
+    }
+```
 
 ## TODO
 
