@@ -138,6 +138,7 @@ export default class RabbitMQConnectionFacade {
         await this.channel.assertQueue(this.queue, {
             durable: true,
             autoDelete: false,
+            deadLetterExchange: this.deadLetterExchange,
         });
         await this.channel.assertQueue(this.retryQueue, {
             durable: true,
