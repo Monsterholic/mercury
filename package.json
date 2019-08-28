@@ -1,6 +1,6 @@
 {
     "name": "mercury-messenger",
-    "version": "1.0.45",
+    "version": "1.0.46",
     "description": "Messaging Helper for Event Driven Systems",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
