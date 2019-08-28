@@ -57,7 +57,7 @@ export default class RabbitMQConnectionFacade {
 
                 if (
                     !message.properties.headers['x-death'] ||
-                    (message.properties.headers['x-death'] && message.properties.headers['x-death'].length <= 8)
+                    (message.properties.headers['x-death'] && message.properties.headers['x-death'][0].count <= 8)
                 ) {
                     await this.channel.nack(message, false, false);
                 }
