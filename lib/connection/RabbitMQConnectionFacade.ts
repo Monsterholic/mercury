@@ -46,7 +46,7 @@ export default class RabbitMQConnectionFacade {
             console.log(e);
         }
 
-        const messagePool = new Map();
+        const messagePool = new Map<string, ConsumeMessage>();
 
         this.channel.consume(
             `${this.queue}`,
@@ -63,13 +63,12 @@ export default class RabbitMQConnectionFacade {
                             'error',
                             async ([error, messageId, mercuryMessage]: [Error, string, Message]): Promise<void> => {
                                 let message: ConsumeMessage = messagePool.get(messageId);
-                                await this.channel.ack(message);
-
                                 let retries = message.properties.headers.retries
                                     ? message.properties.headers.retries + 1
                                     : 0;
 
-                                if (retries <= 8) await this.publish(mercuryMessage, this.deadLetterExchange, retries);
+                                message.properties.headers.retries = retries;
+                                if (retries <= 8) this.channel.nack(message);
 
                                 messagePool.delete(messageId);
                             },
