@@ -47,52 +47,47 @@ export default class RabbitMQConnectionFacade {
         }
 
         const messagePool = new Map<string, ConsumeMessage>();
+        const emitter = MessageEmitter.getMessageEmitter();
+
+        emitter.on(
+            'error',
+            async ([error, messageId, mercuryMessage]: [Error, string, Message]): Promise<void> => {
+                let message: ConsumeMessage = messagePool.get(messageId);
+                messagePool.delete(messageId);
+
+                if (message.properties.headers['x-death'] && message.properties.headers['x-death'].length <= 8) {
+                    await this.channel.nack(message, false, false);
+                }
+            },
+        );
+
+        emitter.on(
+            'success',
+            async ([messageId, resultingMessages]: [string, Message[] | Message]): Promise<void> => {
+                await this.channel.ack(messagePool.get(messageId));
+
+                if (resultingMessages) {
+                    if (Array.isArray(resultingMessages)) {
+                        for (let message of resultingMessages) {
+                            await this.publish(message);
+                        }
+                    } else if (resultingMessages instanceof Message) {
+                        await this.publish(resultingMessages);
+                    }
+                }
+
+                messagePool.delete(messageId);
+            },
+        );
 
         this.channel.consume(
             `${this.queue}`,
             async (msg: ConsumeMessage): Promise<void> => {
-                const emitter = MessageEmitter.getMessageEmitter();
-
                 if (msg.properties.appId === this.appName) {
                     if (msg.properties.messageId) {
                         const descriptor = msg.fields.routingKey;
 
                         messagePool.set(msg.properties.messageId, msg);
-
-                        emitter.on(
-                            'error',
-                            async ([error, messageId, mercuryMessage]: [Error, string, Message]): Promise<void> => {
-                                let message: ConsumeMessage = messagePool.get(messageId);
-                                messagePool.delete(messageId);
-
-                                if (
-                                    message.properties.headers['x-death'] &&
-                                    message.properties.headers['x-death'].length <= 8
-                                ) {
-                                    await this.channel.nack(message, false, false);
-                                }
-                            },
-                        );
-
-                        emitter.on(
-                            'success',
-                            async ([messageId, resultingMessages]: [string, Message[] | Message]): Promise<void> => {
-                                await this.channel.ack(messagePool.get(messageId));
-
-                                if (resultingMessages !== undefined) {
-                                    if (Array.isArray(resultingMessages)) {
-                                        for (let message of resultingMessages) {
-                                            await this.publish(message);
-                                        }
-                                    } else if (resultingMessages instanceof Message) {
-                                        await this.publish(resultingMessages);
-                                    }
-                                }
-
-                                messagePool.delete(messageId);
-                            },
-                        );
-
                         const message = new JSONMessage(descriptor, msg.content, msg.properties.messageId);
                         emitter.emit(descriptor, message);
                     } else {
@@ -145,7 +140,7 @@ export default class RabbitMQConnectionFacade {
             autoDelete: false,
             deadLetterExchange: this.exchange,
             arguments: {
-                'x-message-ttl': 60000,
+                'x-message-ttl': 5000,
             },
         });
 
