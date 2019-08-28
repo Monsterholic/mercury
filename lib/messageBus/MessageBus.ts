@@ -4,6 +4,7 @@ export interface OptionsMap {
     brokerUserName: string;
     brokerPassword: string;
     serviceName: string;
+    retryDelay: number;
 }
 
 export default interface MessageBus {

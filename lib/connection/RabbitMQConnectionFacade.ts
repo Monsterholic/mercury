@@ -12,13 +12,15 @@ export default class RabbitMQConnectionFacade {
     private readonly queue: string;
     private readonly retryQueue: string;
     private readonly appName: string;
+    private delayRetry: number;
 
-    public constructor(serviceName: string, appName: string) {
+    public constructor(serviceName: string, appName: string, delayRetry: number) {
         this.exchange = serviceName;
         this.deadLetterExchange = `${this.exchange}_dlx`;
         this.queue = `${serviceName}_queue`;
         this.retryQueue = `${this.queue}_retry`;
         this.appName = appName;
+        this.delayRetry = delayRetry;
     }
 
     public async disconnect(): Promise<void> {
@@ -148,7 +150,7 @@ export default class RabbitMQConnectionFacade {
             autoDelete: false,
             deadLetterExchange: this.exchange,
             arguments: {
-                'x-message-ttl': 5000,
+                'x-message-ttl': this.delayRetry,
             },
         });
 

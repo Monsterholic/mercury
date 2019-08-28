@@ -1,7 +1,9 @@
 import RabbitMQMessageBus from './messageBus/RabbitMQMessageBus';
 import MessageBus from './messageBus/MessageBus';
 
-const RABBITQM = 'rabbitmq';
+export enum BrokerType {
+    RABBITMQ = 'RABBITMQ',
+}
 
 export default class Mercury {
     private messageBus: MessageBus;
@@ -10,23 +12,26 @@ export default class Mercury {
     private brokerHostName: string;
     private brokerUserName: string;
     private brokerPassword: string;
+    private retryDelay: number;
 
     public constructor(
-        brokerType: string,
+        brokerType: BrokerType,
         brokerHostName: string,
         brokerUserName: string,
         brokerPassword: string,
         appName: string,
         serviceName: string,
+        retryDelay: number = 60,
     ) {
         this.appName = appName;
         this.serviceName = serviceName;
         this.brokerHostName = brokerHostName;
         this.brokerUserName = brokerUserName;
         this.brokerPassword = brokerPassword;
+        this.retryDelay = retryDelay;
 
         switch (brokerType) {
-            case RABBITQM:
+            case BrokerType.RABBITMQ:
                 this.messageBus = new RabbitMQMessageBus();
                 break;
             default:
@@ -42,6 +47,7 @@ export default class Mercury {
             brokerPassword: this.brokerPassword,
             appName: this.appName,
             serviceName: this.serviceName,
+            retryDelay: this.retryDelay,
         });
     }
 
