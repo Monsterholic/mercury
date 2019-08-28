@@ -42,8 +42,7 @@ Now you can define you own class with as many handlers as needed,Just use the 'h
 When the intended message appear in the system's message ecosystem, the handler function will be called.
 
 ```javascript
-import handler from 'mercury-messenger/dist/decorator/HandlerDecorator';
-import JSONMessage from 'mercury-messenger/dist/message/JSONMessage';
+import { handler JSONMessage } from 'mercury-messenger';
 
 class testeHandler {
     @handler('used-created')
