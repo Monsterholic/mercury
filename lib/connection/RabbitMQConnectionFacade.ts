@@ -63,6 +63,8 @@ export default class RabbitMQConnectionFacade {
                         message.properties.headers['x-death'][0].count <= maxRetries)
                 ) {
                     await this.channel.nack(message, false, false);
+                } else {
+                    await this.channel.ack(message);
                 }
             },
         );
