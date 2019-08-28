@@ -68,7 +68,7 @@ export default class RabbitMQConnectionFacade {
                                     : 0;
 
                                 message.properties.headers.retries = retries;
-                                if (retries <= 8) this.channel.nack(message);
+                                if (retries <= 8) this.channel.nack(message, false, false);
 
                                 messagePool.delete(messageId);
                             },
