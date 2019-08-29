@@ -2,6 +2,9 @@ import * as EventEmitter from 'events';
 
 export default class MessageEmitter extends EventEmitter {
     private static emitter: MessageEmitter;
+    public static readonly PROCESS_SUCCESS = 'PROCESS_SUCCESS';
+    public static readonly MESSAGE_PROCESS_SUCCESS = 'MESSAGE_PROCESS_SUCCESS';
+    public static readonly MESSAGE_PROCESS_ERROR = 'MESSAGE_PROCESS_ERROR';
 
     private constructor() {
         super();

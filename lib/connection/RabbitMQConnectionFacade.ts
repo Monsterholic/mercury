@@ -52,7 +52,7 @@ export default class RabbitMQConnectionFacade {
         const emitter = MessageEmitter.getMessageEmitter();
 
         emitter.on(
-            'error',
+            MessageEmitter.MESSAGE_PROCESS_ERROR,
             async ([error, messageId, mercuryMessage, maxRetries]: [Error, string, Message, number]): Promise<void> => {
                 let message: ConsumeMessage = messagePool.get(messageId);
                 messagePool.delete(messageId);
@@ -72,7 +72,7 @@ export default class RabbitMQConnectionFacade {
         );
 
         emitter.on(
-            'success',
+            MessageEmitter.MESSAGE_PROCESS_SUCCESS,
             async ([messageId, resultingMessages]: [string, Message[] | Message]): Promise<void> => {
                 await this.channel.ack(messagePool.get(messageId));
 
@@ -87,6 +87,21 @@ export default class RabbitMQConnectionFacade {
                 }
 
                 messagePool.delete(messageId);
+            },
+        );
+
+        emitter.on(
+            MessageEmitter.PROCESS_SUCCESS,
+            async ([resultingMessages]: [Message[] | Message]): Promise<void> => {
+                if (resultingMessages) {
+                    if (Array.isArray(resultingMessages)) {
+                        for (let message of resultingMessages) {
+                            await this.publish(message);
+                        }
+                    } else if (resultingMessages instanceof Message) {
+                        await this.publish(resultingMessages);
+                    }
+                }
             },
         );
 
