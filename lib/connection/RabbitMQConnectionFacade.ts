@@ -151,7 +151,7 @@ export default class RabbitMQConnectionFacade {
                 autoDelete: false,
                 deadLetterExchange: this.exchange,
                 arguments: {
-                    'x-message-ttl': this.delayRetry * 10000,
+                    'x-message-ttl': this.delayRetry * 1000,
                 },
             });
         } catch (e) {
