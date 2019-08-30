@@ -152,7 +152,7 @@ export class TestController implements interfaces.Controller {
 
 In this case,function will not be called for any new message.but now you can control when invoke the function.In the example
 above @handler decorator is chained with another decorator provided by 'inversify-express-utils' package to automatic routing.Any Messages
-or Array of messages returned here will be published in the message bus.
+or Array of messages returned here will be published in the message bus.If the returned value is not a Message instance, then it's ignored.
 
 ## TODO
 
