@@ -6,10 +6,19 @@ export function StorageEvent() {
     return function(target, propertyKey: string, descriptors: PropertyDescriptor) {
         const Events: Array<string> = Reflect.getMetadata('descriptors', Mercury);
 
-        Events.forEach((value: string) => {
-            MessageEmitter.getMessageEmitter().on(value, function(args) {
-                console.log('event save!', args);
+        if (descriptors) {
+            const original = descriptors.value;
+
+            const decoratedFunction = async (args: Message[]): Promise<void> => {
+                await original.apply(this, args);
+            };
+
+            descriptors.value = decoratedFunction;
+
+            Events.forEach((value: string) => {
+                MessageEmitter.getMessageEmitter().on(value, decoratedFunction);
             });
-        });
+        }
+        return descriptors;
     };
 }
