@@ -10,12 +10,9 @@
         "sourceMap": true,
         "declaration": true
     },
-    "include": ["lib/**/*.ts", "test/**/*.ts"],
+    "include": ["lib/**/*.ts", "tests/**/*.ts"],
     "exclude": ["node_modules", "dist"],
     "baseUrl": "lib",
-    "paths": {
-        "mercury-messeger*": ["./*"]
-    },
     "buildOnSave": true,
     "compileOnSave": true
 }
