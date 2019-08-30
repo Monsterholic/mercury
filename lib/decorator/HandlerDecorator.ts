@@ -18,22 +18,23 @@ const handler = (messageDescriptor: string = null, maxRetries: number = null): M
         }
 
         const original = propertyDescriptor.value;
-        const decoratedFunction = async (args: Message[]): Promise<void> => {
+        const decoratedFunction = async (...args: any[]): Promise<any> => {
             let message = null;
             if (Array.isArray(args)) {
                 message = args.find((arg: Message): boolean => arg instanceof Message);
             }
             try {
-                let resultingEvents: Message[] = await original.apply(this, args);
+                let result: Message[] = await original.apply(this, args);
                 if (message) {
                     MessageEmitter.getMessageEmitter().emit(
                         MessageEmitter.MESSAGE_PROCESS_SUCCESS,
                         message.getUUID(),
-                        resultingEvents,
+                        result,
                     );
                 } else {
-                    MessageEmitter.getMessageEmitter().emit(MessageEmitter.PROCESS_SUCCESS, resultingEvents);
+                    MessageEmitter.getMessageEmitter().emit(MessageEmitter.PROCESS_SUCCESS, result);
                 }
+                return result;
             } catch (e) {
                 if (message) {
                     MessageEmitter.getMessageEmitter().emit(
