@@ -1,18 +1,21 @@
 {
-  "compilerOptions":{
-    "target":"es2018",
-    "lib":["es2018", "esnext.asynciterable"],
-    "module":"commonjs",
-    "types" : ["reflect-metadata", "node"],
-    "outDir": "dist",
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "sourceMap": true,
-    "declaration": true
-  },
-  "include": [
-    "lib/**/*.ts", "test/**/*.ts"],
-  "exclude": ["node_modules","dist"],
-  "buildOnSave": true,
-  "compileOnSave": true
+    "compilerOptions": {
+        "target": "es2018",
+        "lib": ["es2018", "esnext.asynciterable"],
+        "module": "commonjs",
+        "types": ["reflect-metadata", "node", "jest"],
+        "outDir": "dist",
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
+        "sourceMap": true,
+        "declaration": true
+    },
+    "include": ["lib/**/*.ts", "test/**/*.ts"],
+    "exclude": ["node_modules", "dist"],
+    "baseUrl": "lib",
+    "paths": {
+        "mercury-messeger*": ["./*"]
+    },
+    "buildOnSave": true,
+    "compileOnSave": true
 }
