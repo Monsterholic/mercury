@@ -2,7 +2,7 @@ import Mercury from '../Mercury';
 import MessageEmitter from '../messageBus/MessageBusEventEmitter';
 import Message from '../message/Message';
 
-const handler = (messageDescriptor: string, maxRetries: number): MethodDecorator => {
+const handler = (messageDescriptor: string = null, maxRetries: number = null): MethodDecorator => {
     return (target, propertyKey: string, propertyDescriptor: PropertyDescriptor): PropertyDescriptor => {
         if (messageDescriptor) {
             if (!Reflect.hasMetadata('descriptors', Mercury.prototype.constructor)) {
