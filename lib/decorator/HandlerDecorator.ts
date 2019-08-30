@@ -19,7 +19,10 @@ const handler = (messageDescriptor: string = null, maxRetries: number = null): M
 
         const original = propertyDescriptor.value;
         const decoratedFunction = async (args: Message[]): Promise<void> => {
-            let message = args.find((arg: Message): boolean => arg instanceof Message);
+            let message = null;
+            if (Array.isArray(args)) {
+                message = args.find((arg: Message): boolean => arg instanceof Message);
+            }
             try {
                 let resultingEvents: Message[] = await original.apply(this, args);
                 if (message) {
