@@ -1,6 +1,6 @@
 import 'reflect-metadata';
-import { BrokerType } from '../lib/Mercury';
-import Mercury from '../lib/Mercury';
+import Mercury, { BrokerType } from '../lib/index';
+import './handler';
 
 describe('connection', () => {
     test('throw error on connection failure', () => {
