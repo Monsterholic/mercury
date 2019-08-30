@@ -106,8 +106,8 @@ retried some time later.
 
 The second parameter to @handler decorator is optional,it define how many times mercury will try to processs this message.If no
 value, message will not be retried.Be careful with database logic or external services invocation here, Always find some way to
-rollback or revert previous operations before handler finish if they aren't idempotent.
-You can also define the delay between retries in Mercury constructor.
+rollback or revert previous operations before handler finish if the operations aren't idempotent.
+You can define the delay between retries in Mercury constructor.
 
 #### Succeeded Handlers
 
@@ -126,6 +126,33 @@ published into the system messaging ecosystem and possibly consumed by others su
         return new JSONMessage('product-purchased', { test: 'data' });
     }
 ```
+
+### Publishers
+
+You can define a no-reactive handler function that is intended to publish messages only.Just use the '@handler' decorator
+without arguments:
+
+```
+import * as express from "express";
+import { interfaces, controller, httpGet, httpPost, httpDelete, request, queryParam, response, requestParam } from "inversify-express-utils";
+import {handler,JSONMessage} from "mercury-messenger";
+
+@controller("/foo")
+export class TestController implements interfaces.Controller {
+
+    @httpPost("/")
+    @handler()
+    public async index(req: express.Request, res: express.Response, next: express.NextFunction): Promise<JSONMessage> {
+        res.status(201).send('user creation solicited');
+        return new JSONMessage("create-user-command",{"name":"jonh"})
+    }
+}
+
+```
+
+In this case,function will not be called for any new message.but now you can control when invoke the function.In the example
+above @handler decorator is chained with another decorator provided by 'inversify-express-utils' package to automatic routing.Any Messages
+or Array of messages returned here will be published in the message bus.
 
 ## TODO
 
