@@ -85,16 +85,11 @@
     },
     "jest": {
         "collectCoverageFrom": [
-            "src/**/*.{js,jsx,ts,tsx}",
-            "!src/**/*.d.ts"
+            "lib/**/*.{js,jsx,ts,tsx}",
+            "!lib/**/*.d.ts"
         ],
-        "transform": {
-            ".(ts|tsx)": "ts-jest"
-        },
-        "testRegex": "(/tests/.*|(\\.|/)(test|spec))\\.[jt]sx?$",
-        "moduleNameMapper": {
-            "^mercury-messenger(.*)$": "<rootDir>/lib$1"
-        }
+        "preset": "ts-jest",
+        "testRegex": "(/tests/.*\\.(test|spec))\\.[jt]sx?$"
     },
     "babel": {
         "presets": [
