@@ -25,14 +25,20 @@ const handler = (messageDescriptor: string = null, maxRetries: number = null): M
             }
             try {
                 let result: Message[] = await original.apply(this, args);
+                let resultingMessages =
+                    Array.isArray(result) && result.every(r => r instanceof Message)
+                        ? result
+                        : result instanceof Message
+                        ? [result]
+                        : null;
                 if (message) {
                     MessageEmitter.getMessageEmitter().emit(
                         MessageEmitter.MESSAGE_PROCESS_SUCCESS,
                         message.getUUID(),
-                        result,
+                        resultingMessages,
                     );
                 } else {
-                    MessageEmitter.getMessageEmitter().emit(MessageEmitter.PROCESS_SUCCESS, result);
+                    MessageEmitter.getMessageEmitter().emit(MessageEmitter.PROCESS_SUCCESS, resultingMessages);
                 }
                 return result;
             } catch (e) {

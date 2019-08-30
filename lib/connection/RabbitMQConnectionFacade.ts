@@ -32,7 +32,6 @@ export default class RabbitMQConnectionFacade {
     }
 
     public async connect(hostname: string, username: string, password: string): Promise<void> {
-        //TODO colocar handlers de eventos para caso a conexao caia
         try {
             this.connection = await connect({
                 protocol: 'amqp',
@@ -53,7 +52,7 @@ export default class RabbitMQConnectionFacade {
 
         emitter.on(
             MessageEmitter.MESSAGE_PROCESS_ERROR,
-            async ([error, messageId, mercuryMessage, maxRetries]: [Error, string, Message, number]): Promise<void> => {
+            async (error: Error, messageId: string, mercuryMessage: Message, maxRetries: number): Promise<void> => {
                 let message: ConsumeMessage = messagePool.get(messageId);
                 messagePool.delete(messageId);
 
@@ -73,33 +72,24 @@ export default class RabbitMQConnectionFacade {
 
         emitter.on(
             MessageEmitter.MESSAGE_PROCESS_SUCCESS,
-            async ([messageId, resultingMessages]: [string, Message[] | Message]): Promise<void> => {
+            async (messageId: string, resultingMessages: Message[]): Promise<void> => {
                 await this.channel.ack(messagePool.get(messageId));
 
                 if (resultingMessages) {
-                    if (Array.isArray(resultingMessages)) {
-                        for (let message of resultingMessages) {
-                            await this.publish(message);
-                        }
-                    } else if (resultingMessages instanceof Message) {
-                        await this.publish(resultingMessages);
+                    for (let message of resultingMessages) {
+                        await this.publish(message);
                     }
                 }
-
                 messagePool.delete(messageId);
             },
         );
 
         emitter.on(
             MessageEmitter.PROCESS_SUCCESS,
-            async ([resultingMessages]: [Message[] | Message]): Promise<void> => {
+            async (resultingMessages: Message[]): Promise<void> => {
                 if (resultingMessages) {
-                    if (Array.isArray(resultingMessages)) {
-                        for (let message of resultingMessages) {
-                            await this.publish(message);
-                        }
-                    } else if (resultingMessages instanceof Message) {
-                        await this.publish(resultingMessages);
+                    for (let message of resultingMessages) {
+                        await this.publish(message);
                     }
                 }
             },
