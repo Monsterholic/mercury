@@ -19,10 +19,11 @@ jobs:
                       - v1-dependencies-{{ checksum "package.json" }}
                       - v1-dependencies-
             - run: npm install
+            - run: npm install codacy-coverage
             - run: sleep 10
             - run:
                   name: Run jest and collect coverage reports
-                  command: yarn test --coverage
+                  command: yarn test --coverage && cat ./coverage/lcov.info | npx codacy-coverage
             - store_artifacts:
                   path: coverage
             - save_cache:
