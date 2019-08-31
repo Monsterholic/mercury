@@ -34,9 +34,8 @@ describe('connection', () => {
 
         afterAll(() => mercury.terminate());
 
-        test('can send message', done => {
+        test('can send message', () => {
             handler.publish(testObject);
-            done();
         });
 
         test('can consume message', () => {
