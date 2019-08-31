@@ -21,8 +21,10 @@ jobs:
             - run: npm install
             - run: sleep 10
             - run:
-                  name: Run tests
-                  command: npm test
+                  name: Run jest and collect coverage reports
+                  command: yarn test --coverage
+            - store_artifacts:
+                  path: coverage
             - save_cache:
                   paths:
                       - node_modules
@@ -54,10 +56,13 @@ workflows:
                       tags:
                           only: /^v.*/
                       branches:
-                          only: /master/
+                          only:
+                              - master
+                              - develop
             - deploy:
                   requires:
                       - test
                   filters:
                       branches:
-                          only: /master/
+                          only:
+                              - master
