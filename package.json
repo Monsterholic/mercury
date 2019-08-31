@@ -9,7 +9,7 @@
     ],
     "scripts": {
         "test": "jest --detectOpenHandles",
-        "lint": "eslint '*/**/*.{ts,tsx}' --fix",
+        "lint": "eslint '{lib,tests}/**/*.{ts,tsx}' --fix",
         "build": "tsc"
     },
     "repository": {
@@ -44,7 +44,7 @@
         },
         {
             "name": "noamcore",
-            "email": "",
+            "email": "146050u54@gmail.com",
             "url": "https://github.com/noamcore"
         }
     ],
@@ -60,10 +60,11 @@
         "@types/jest": "^24.0.18",
         "@types/node": "^10.14.9",
         "@typescript-eslint/eslint-plugin": "^2.0.0",
+        "@typescript-eslint/parser": "^2.0.0",
         "babel-jest": "^24.9.0",
         "eslint": "^5.16.0",
         "eslint-config-airbnb-base": "^13.1.0",
-        "eslint-config-prettier": "^4.3.0",
+        "eslint-config-prettier": "^6.1.0",
         "eslint-plugin-import": "^2.17.2",
         "eslint-plugin-prettier": "^3.1.0",
         "husky": "^3.0.3",

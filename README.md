@@ -116,7 +116,7 @@ You can define the delay between retries in Mercury constructor.
 If there is no errors during handler execution, then any Message or array of Messages returned by the handler function will be
 published into the system messaging ecosystem and possibly consumed by others subscribers services.
 
-```
+```javascript
  @handler('order-created')
     handler2(msg) {
         console.log('Something has been ordered');
@@ -134,7 +134,7 @@ published into the system messaging ecosystem and possibly consumed by others su
 You can define a no-reactive handler function that is intended to publish messages only.Just use the '@handler' decorator
 without arguments:
 
-```
+```javascript
 import * as express from "express";
 import { interfaces, controller, httpGet, httpPost, httpDelete, request, queryParam, response, requestParam } from "inversify-express-utils";
 import {handler,JSONMessage} from "mercury-messenger";

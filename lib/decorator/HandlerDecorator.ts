@@ -18,14 +18,14 @@ const handler = (messageDescriptor: string = null, maxRetries: number = null): M
         }
 
         const original = propertyDescriptor.value;
-        const decoratedFunction = async (...args: any[]): Promise<any> => {
+        const decoratedFunction = async (...args): Promise<Message[]> => {
             let message = null;
             if (Array.isArray(args)) {
                 message = args.find((arg: Message): boolean => arg instanceof Message);
             }
             try {
-                let result: Message[] = await original.apply(this, args);
-                let resultingMessages =
+                const result: Message[] = await original.apply(this, args);
+                const resultingMessages =
                     Array.isArray(result) && result.every(r => r instanceof Message)
                         ? result
                         : result instanceof Message
@@ -57,7 +57,9 @@ const handler = (messageDescriptor: string = null, maxRetries: number = null): M
         };
 
         propertyDescriptor.value = decoratedFunction;
-        MessageEmitter.getMessageEmitter().addListener(messageDescriptor, decoratedFunction);
+        MessageEmitter.getMessageEmitter().addListener(messageDescriptor, () => {
+            decoratedFunction();
+        });
 
         return propertyDescriptor;
     };

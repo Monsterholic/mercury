@@ -21,7 +21,7 @@ export default class Mercury {
         brokerPassword: string,
         appName: string,
         serviceName: string,
-        retryDelay: number = 60,
+        retryDelay = 60,
     ) {
         this.appName = appName;
         this.serviceName = serviceName;

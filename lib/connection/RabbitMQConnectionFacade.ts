@@ -48,8 +48,8 @@ export default class RabbitMQConnectionFacade {
 
         emitter.on(
             MessageEmitter.MESSAGE_PROCESS_ERROR,
-            async (error: Error, messageId: string, mercuryMessage: Message, maxRetries: number): Promise<void> => {
-                let message: ConsumeMessage = messagePool.get(messageId);
+            (error: Error, messageId: string, mercuryMessage: Message, maxRetries: number) => {
+                const message: ConsumeMessage = messagePool.get(messageId);
                 messagePool.delete(messageId);
 
                 maxRetries = maxRetries ? maxRetries : 60;
@@ -59,59 +59,50 @@ export default class RabbitMQConnectionFacade {
                     (message.properties.headers['x-death'] &&
                         message.properties.headers['x-death'][0].count <= maxRetries)
                 ) {
-                    await this.channel.nack(message, false, false);
+                    this.channel.nack(message, false, false);
                 } else {
-                    await this.channel.ack(message);
+                    this.channel.ack(message);
                 }
             },
         );
 
-        emitter.on(
-            MessageEmitter.MESSAGE_PROCESS_SUCCESS,
-            async (messageId: string, resultingMessages: Message[]): Promise<void> => {
-                await this.channel.ack(messagePool.get(messageId));
+        emitter.on(MessageEmitter.MESSAGE_PROCESS_SUCCESS, (messageId: string, resultingMessages: Message[]) => {
+            this.channel.ack(messagePool.get(messageId));
 
-                if (resultingMessages) {
-                    for (let message of resultingMessages) {
-                        await this.publish(message);
-                    }
+            if (resultingMessages) {
+                for (const message of resultingMessages) {
+                    this.publish(message);
                 }
-                messagePool.delete(messageId);
-            },
-        );
+            }
+            messagePool.delete(messageId);
+        });
 
-        emitter.on(
-            MessageEmitter.PROCESS_SUCCESS,
-            async (resultingMessages: Message[]): Promise<void> => {
-                if (resultingMessages) {
-                    for (let message of resultingMessages) {
-                        await this.publish(message);
-                    }
+        emitter.on(MessageEmitter.PROCESS_SUCCESS, (resultingMessages: Message[]) => {
+            if (resultingMessages) {
+                for (const message of resultingMessages) {
+                    this.publish(message);
                 }
-            },
-        );
+            }
+        });
 
-        this.channel.consume(
-            `${this.queue}`,
-            async (msg: ConsumeMessage): Promise<void> => {
-                if (msg.properties.appId === this.appName) {
-                    if (msg.properties.messageId) {
-                        const descriptor = msg.fields.routingKey;
+        this.channel.consume(`${this.queue}`, (msg: ConsumeMessage): void => {
+            if (msg.properties.appId === this.appName) {
+                if (msg.properties.messageId) {
+                    const descriptor = msg.fields.routingKey;
 
-                        messagePool.set(msg.properties.messageId, msg);
-                        const message = new JSONMessage(descriptor, msg.content, msg.properties.messageId);
-                        emitter.emit(descriptor, message);
-                    } else {
-                        this.channel.ack(msg);
-                    }
+                    messagePool.set(msg.properties.messageId, msg);
+                    const message = new JSONMessage(descriptor, msg.content, msg.properties.messageId);
+                    emitter.emit(descriptor, message);
                 } else {
                     this.channel.ack(msg);
                 }
-            },
-        );
+            } else {
+                this.channel.ack(msg);
+            }
+        });
     }
 
-    public async publish(message: Message, alternativeExchange: string = null, retryCount: number = 0): Promise<void> {
+    public publish(message: Message, alternativeExchange: string = null, retryCount = 0): void {
         const exchange = alternativeExchange ? alternativeExchange : this.main_bus;
 
         this.channel.publish(exchange, message.getDescriptor(), Buffer.from(message.getSerializedContent()), {
@@ -166,7 +157,7 @@ export default class RabbitMQConnectionFacade {
 
     public async subscribeAll(descriptors: string[]): Promise<void> {
         if (Array.isArray(descriptors)) {
-            for (let descriptor of descriptors) {
+            for (const descriptor of descriptors) {
                 await this.subscribe(descriptor);
             }
         }
