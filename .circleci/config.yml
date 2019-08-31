@@ -23,7 +23,7 @@ jobs:
             - run: sleep 10
             - run:
                   name: Run jest and collect coverage reports
-                  command: yarn test --coverage && cat ./coverage/lcov.info | npx codacy-coverage
+                  command: yarn test --coverage --runInBand && cat ./coverage/lcov.info | npx codacy-coverage
             - store_artifacts:
                   path: coverage
             - save_cache:

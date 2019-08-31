@@ -40,7 +40,9 @@ describe('connection', () => {
         });
 
         test('can consume message', () => {
-            expect(mock).toHaveBeenCalledWith(testObject);
+            setTimeout(() => {
+                expect(mock).toHaveBeenCalledWith(testObject);
+            }, 1000);
         });
     });
 });
