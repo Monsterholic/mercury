@@ -57,8 +57,8 @@ const handler = (messageDescriptor: string = null, maxRetries: number = null): M
         };
 
         propertyDescriptor.value = decoratedFunction;
-        MessageEmitter.getMessageEmitter().addListener(messageDescriptor, () => {
-            decoratedFunction();
+        MessageEmitter.getMessageEmitter().addListener(messageDescriptor, message => {
+            decoratedFunction(message);
         });
 
         return propertyDescriptor;
