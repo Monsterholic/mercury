@@ -14,7 +14,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "https://github.com/cl3dson/mercury.git"
+        "url": "https://github.com/Monsterholic/mercury.git"
     },
     "keywords": [
         "messaging",
@@ -50,9 +50,9 @@
     ],
     "license": "ISC",
     "bugs": {
-        "url": "https://github.com/cl3dson/mercury/issues"
+        "url": "https://github.com/Monsterholic/mercury/issues"
     },
-    "homepage": "https://github.com/cl3dson/mercury#readme",
+    "homepage": "https://github.com/Monsterholic/mercury#readme",
     "devDependencies": {
         "@babel/core": "^7.5.5",
         "@babel/preset-env": "^7.5.5",
