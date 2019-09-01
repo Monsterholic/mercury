@@ -78,7 +78,8 @@
         "@types/amqplib": "^0.5.11",
         "amqplib": "^0.5.3",
         "reflect-metadata": "^0.1.13",
-        "typescript": "^3.5.3"
+        "typescript": "^3.5.3",
+        "uuid": "^3.3.3"
     },
     "husky": {
         "hooks": {

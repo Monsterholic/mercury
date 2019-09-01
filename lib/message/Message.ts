@@ -1,18 +1,32 @@
+import * as uuid from 'uuid';
+
 export default abstract class Message {
     private readonly uuid: string;
     private readonly descriptor: string;
     protected readonly content;
     private readonly creationDate: Date;
+    private parentMessage: string;
 
-    public constructor(descriptor: string, content, id: string = null) {
-        this.uuid = id === null ? this.generateUUID() : id;
+    public constructor(
+        descriptor: string,
+        content,
+        id: string = null,
+        timestamp: number = null,
+        parentMessage: string = null,
+    ) {
+        this.uuid = id ? id : uuid.v4();
         this.descriptor = descriptor;
         this.content = content;
-        this.creationDate = new Date();
+        this.creationDate = timestamp ? new Date(timestamp) : new Date();
+        this.parentMessage = parentMessage;
     }
 
     public getUUID(): string {
         return this.uuid;
+    }
+
+    public getParentMessage(): string {
+        return this.parentMessage;
     }
 
     public abstract getContent();
@@ -25,13 +39,7 @@ export default abstract class Message {
     public getCreationDate(): Date {
         return this.creationDate;
     }
-
-    private generateUUID(): string {
-        let dt = new Date().getTime();
-        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c): string {
-            const r = (dt + Math.random() * 16) % 16 | 0;
-            dt = Math.floor(dt / 16);
-            return (c == 'x' ? r : (r & 0x3) | 0x8).toString(16);
-        });
+    public setParentMessage(parentMessageUUID: string): void {
+        this.parentMessage = parentMessageUUID;
     }
 }

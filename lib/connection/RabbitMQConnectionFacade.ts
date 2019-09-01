@@ -91,7 +91,13 @@ export default class RabbitMQConnectionFacade {
                     const descriptor = msg.fields.routingKey;
 
                     messagePool.set(msg.properties.messageId, msg);
-                    const message = new JSONMessage(descriptor, msg.content, msg.properties.messageId);
+                    const message = new JSONMessage(
+                        descriptor,
+                        msg.content,
+                        msg.properties.messageId,
+                        msg.properties.timestamp,
+                        msg.properties.headers.parentMessage,
+                    );
                     emitter.emit(descriptor, message);
                 } else {
                     this.channel.ack(msg);
@@ -102,11 +108,11 @@ export default class RabbitMQConnectionFacade {
         });
     }
 
-    public publish(message: Message, alternativeExchange: string = null, retryCount = 0): void {
+    public publish(message: Message, alternativeExchange: string = null): void {
         const exchange = alternativeExchange ? alternativeExchange : this.main_bus;
 
         this.channel.publish(exchange, message.getDescriptor(), Buffer.from(message.getSerializedContent()), {
-            headers: { retries: retryCount },
+            headers: { parentMessage: message.getParentMessage() },
             persistent: true,
             messageId: message.getUUID(),
             timestamp: new Date().getTime(),
