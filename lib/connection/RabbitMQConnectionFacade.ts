@@ -57,7 +57,7 @@ export default class RabbitMQConnectionFacade {
                 if (
                     !message.properties.headers['x-death'] ||
                     (message.properties.headers['x-death'] &&
-                        message.properties.headers['x-death'][0].count <= maxRetries)
+                        message.properties.headers['x-death'][0].count < maxRetries)
                 ) {
                     this.channel.nack(message, false, false);
                 } else {
