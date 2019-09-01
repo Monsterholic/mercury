@@ -7,11 +7,11 @@
         "outDir": "dist",
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
-        "sourceMap": false,
+        "sourceMap": true,
         "declaration": true
     },
-    "include": ["lib/**/*.ts", "tests/**/*.ts"],
-    "exclude": ["node_modules", "dist"],
+    "include": ["lib/**/*.ts"],
+    "exclude": ["node_modules", "dist", "tests/**/*.ts"],
     "baseUrl": "lib",
     "buildOnSave": true,
     "compileOnSave": true
