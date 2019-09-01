@@ -1,9 +1,6 @@
 import RabbitMQMessageBus from './messageBus/RabbitMQMessageBus';
 import MessageBus from './messageBus/MessageBus';
-
-export enum BrokerType {
-    RABBITMQ = 'RABBITMQ',
-}
+import { BrokerType } from './Enums/BrokerType';
 
 export default class Mercury {
     private messageBus: MessageBus;

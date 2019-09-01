@@ -2,10 +2,10 @@
     "name": "mercury-messenger",
     "version": "1.1.26",
     "description": "Messaging Helper for Event Driven Systems",
-    "main": "dist/lib/index.js",
-    "types": "dist//lib/index.d.ts",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
     "files": [
-        "dist/lib/**/*"
+        "dist/**/*"
     ],
     "scripts": {
         "test": "jest --detectOpenHandles",
