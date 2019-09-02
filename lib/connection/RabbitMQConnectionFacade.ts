@@ -50,6 +50,7 @@ export default class RabbitMQConnectionFacade {
                 password,
             });
             this.channel = await this.connection.createChannel();
+            this.channel.on('error', () => console.log('Errororororororoo'));
             await this.setUp();
         } catch (e) {
             throw e;
@@ -57,6 +58,10 @@ export default class RabbitMQConnectionFacade {
 
         const messagePool = new Map<string, ConsumeMessage>();
         const emitter = MessageEmitter.getMessageEmitter();
+
+        emitter.on('error', err => {
+            console.error(err.toString());
+        });
 
         emitter.on(
             MessageEmitter.MESSAGE_PROCESS_ERROR,
@@ -92,7 +97,11 @@ export default class RabbitMQConnectionFacade {
         emitter.on(MessageEmitter.PROCESS_SUCCESS, (resultingMessages: Message[]) => {
             if (resultingMessages) {
                 for (const message of resultingMessages) {
-                    this.publish(message);
+                    try {
+                        this.publish(message);
+                    } catch (e) {
+                        emitter.emit('error', e);
+                    }
                 }
             }
         });
@@ -127,13 +136,22 @@ export default class RabbitMQConnectionFacade {
 
     public publish(message: Message, alternativeExchange: string = null): boolean {
         const exchange = alternativeExchange ? alternativeExchange : this.main_bus;
-        return this.channel.publish(exchange, message.getDescriptor(), Buffer.from(message.getSerializedContent()), {
-            headers: { parentMessage: message.getParentMessage() },
-            persistent: true,
-            messageId: message.getUUID(),
-            timestamp: new Date().getTime(),
-            appId: this.appName,
-        });
+        try {
+            return this.channel.publish(
+                exchange,
+                message.getDescriptor(),
+                Buffer.from(message.getSerializedContent()),
+                {
+                    headers: { parentMessage: message.getParentMessage() },
+                    persistent: true,
+                    messageId: message.getUUID(),
+                    timestamp: new Date().getTime(),
+                    appId: this.appName,
+                },
+            );
+        } catch (e) {
+            throw e;
+        }
     }
 
     public async subscribe(descriptor: string): Promise<string> {
