@@ -37,8 +37,6 @@ export default class RabbitMQConnectionFacade {
         } else {
             return false;
         }
-
-        return true;
     }
 
     public async connect(hostname: string, username: string, password: string): Promise<Connection> {
@@ -50,8 +48,9 @@ export default class RabbitMQConnectionFacade {
                 username,
                 password,
             });
+            this.connection.on('error', () => console.log('Connection error'));
             this.channel = await this.connection.createChannel();
-            this.channel.on('error', () => console.log('Errororororororoo'));
+            this.channel.on('error', () => console.log('Channel error'));
             await this.setUp();
         } catch (e) {
             throw e;
@@ -60,9 +59,7 @@ export default class RabbitMQConnectionFacade {
         const messagePool = new Map<string, ConsumeMessage>();
         const emitter = MessageEmitter.getMessageEmitter();
 
-        emitter.on('error', err => {
-            console.error(err.toString());
-        });
+        emitter.on('error', () => {});
 
         emitter.on(
             MessageEmitter.MESSAGE_PROCESS_ERROR,
@@ -87,8 +84,10 @@ export default class RabbitMQConnectionFacade {
         );
 
         emitter.on(MessageEmitter.MESSAGE_PROCESS_SUCCESS, (messageId: string, resultingMessages: Message[]) => {
+            if (!messageId) {
+                return;
+            }
             this.channel.ack(messagePool.get(messageId));
-
             if (resultingMessages) {
                 for (const message of resultingMessages) {
                     this.publish(message);
@@ -216,7 +215,5 @@ export default class RabbitMQConnectionFacade {
         } else {
             return false;
         }
-
-        return false;
     }
 }

@@ -39,7 +39,7 @@ const handler = (messageDescriptor: string = null, maxRetries: number = null): M
                     }
                     MessageEmitter.getMessageEmitter().emit(
                         MessageEmitter.MESSAGE_PROCESS_SUCCESS,
-                        message.getUUID(),
+                        resultingMessages.length ? message.getUUID() : null,
                         resultingMessages,
                     );
                 } else {
@@ -48,7 +48,6 @@ const handler = (messageDescriptor: string = null, maxRetries: number = null): M
                 return result;
             } catch (e) {
                 if (message) {
-                    console.log(e.toString());
                     MessageEmitter.getMessageEmitter().emit(
                         MessageEmitter.MESSAGE_PROCESS_ERROR,
                         e,
