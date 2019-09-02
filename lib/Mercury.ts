@@ -55,7 +55,7 @@ export default class Mercury {
         }
     }
 
-    public async terminate(): Promise<void> {
-        await this.messageBus.terminate();
+    public async terminate(): Promise<boolean> {
+        return await this.messageBus.terminate();
     }
 }
