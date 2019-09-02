@@ -26,6 +26,7 @@ export default class RabbitMQConnectionFacade {
     public async disconnect(): Promise<boolean> {
         if (this.connection) {
             try {
+                this.channel.removeAllListeners();
                 await this.channel.close();
                 await this.connection.close();
                 this.connection = undefined;
