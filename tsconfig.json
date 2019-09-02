@@ -3,7 +3,7 @@
         "target": "es2018",
         "lib": ["es2018", "esnext.asynciterable"],
         "module": "commonjs",
-        "types": ["reflect-metadata", "node", "jest"],
+        "types": ["reflect-metadata", "node"],
         "outDir": "dist",
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
@@ -11,7 +11,7 @@
         "declaration": true
     },
     "include": ["lib/**/*.ts"],
-    "exclude": ["node_modules", "dist", "tests/**/*.ts"],
+    "exclude": ["node_modules", "tests"],
     "baseUrl": "lib",
     "buildOnSave": true,
     "compileOnSave": true
