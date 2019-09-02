@@ -3,7 +3,7 @@ import * as uuid from 'uuid';
 export default abstract class Message {
     private readonly uuid: string;
     private readonly descriptor: string;
-    protected readonly content;
+    protected readonly content: Buffer | string;
     private readonly creationDate: Date;
     private parentMessage: string;
 
