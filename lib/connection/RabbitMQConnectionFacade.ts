@@ -36,6 +36,8 @@ export default class RabbitMQConnectionFacade {
         } else {
             return false;
         }
+
+        return true;
     }
 
     public async connect(hostname: string, username: string, password: string): Promise<Connection> {
@@ -193,5 +195,7 @@ export default class RabbitMQConnectionFacade {
         } else {
             return false;
         }
+
+        return false;
     }
 }
