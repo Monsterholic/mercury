@@ -67,18 +67,20 @@ export default class RabbitMQConnectionFacade {
             MessageEmitter.MESSAGE_PROCESS_ERROR,
             (error: Error, messageId: string, mercuryMessage: Message, maxRetries: number) => {
                 const message: ConsumeMessage = messagePool.get(messageId);
-                messagePool.delete(messageId);
+                if (message) {
+                    messagePool.delete(messageId);
 
-                maxRetries = maxRetries ? maxRetries : 60;
+                    maxRetries = maxRetries ? maxRetries : 60;
 
-                if (
-                    !message.properties.headers['x-death'] ||
-                    (message.properties.headers['x-death'] &&
-                        message.properties.headers['x-death'][0].count < maxRetries)
-                ) {
-                    this.channel.nack(message, false, false);
-                } else {
-                    this.channel.ack(message);
+                    if (
+                        !message.properties.headers['x-death'] ||
+                        (message.properties.headers['x-death'] &&
+                            message.properties.headers['x-death'][0].count < maxRetries)
+                    ) {
+                        this.channel.nack(message, false, false);
+                    } else {
+                        this.channel.ack(message);
+                    }
                 }
             },
         );
