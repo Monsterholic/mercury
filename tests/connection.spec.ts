@@ -18,7 +18,7 @@ class TestHandler {
 
     @handler()
     public publish(message: object): JSONMessage {
-        return new JSONMessage('user-created', JSON.stringify(message));
+        return new JSONMessage('user-created', message);
     }
 }
 
@@ -27,27 +27,19 @@ describe('connection', () => {
         const mercury = new Mercury(BrokerType.RABBITMQ, 'localhost', 'unused', 'unused', 'testApp', 'testService');
         try {
             await mercury.init();
+            mercury.terminate();
         } catch (e) {
             assert.instanceOf(e, Error);
-        } finally {
-            mercury.terminate();
+            await mercury.terminate();
         }
     });
 
     it('should connect to rabbitmq broker', async () => {
-        const mercury = new Mercury(BrokerType.RABBITMQ, 'localhost', 'guest', 'guest', 'testApp', 'testService');
+        const mercury = new Mercury(BrokerType.RABBITMQ, 'localhost', 'guest', 'guest', 'test', 'connection');
 
-        let connected: boolean;
-
-        try {
-            await mercury.init();
-            connected = true;
-        } catch (e) {
-            connected = false;
-        } finally {
-            expect(connected).to.be.ok;
-            mercury.terminate();
-        }
+        const initialized = await mercury.init();
+        expect(initialized).to.be.true;
+        mercury.terminate();
     });
 });
 
@@ -55,13 +47,13 @@ describe('message', () => {
     const handler = new TestHandler();
     let mercury: Mercury;
 
-    before(() => {
-        mercury = new Mercury(BrokerType.RABBITMQ, 'localhost', 'guest', 'guest', 'testApp', 'testService');
+    beforeEach(() => {
+        mercury = new Mercury(BrokerType.RABBITMQ, 'localhost', 'guest', 'guest', 'test', 'message');
 
         return mercury.init();
     });
 
-    after(() => mercury.terminate());
+    afterEach(() => mercury.terminate());
 
     it('can send message', () => {
         handler.publish(testObject);
