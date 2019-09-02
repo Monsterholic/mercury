@@ -23,25 +23,35 @@ export default class RabbitMQConnectionFacade {
         this.delayRetry = delayRetry;
     }
 
-    public async disconnect(): Promise<void> {
+    public async disconnect(): Promise<boolean> {
         if (this.connection) {
-            await this.channel.close();
-            await this.connection.close();
-            this.connection = undefined;
+            try {
+                await this.channel.close();
+                await this.connection.close();
+                this.connection = undefined;
+                return true;
+            } catch (e) {
+                throw e;
+            }
+        } else {
+            return false;
         }
     }
 
-    public async connect(hostname: string, username: string, password: string): Promise<void> {
-        this.connection = await connect({
-            protocol: 'amqp',
-            hostname,
-            port: 5672,
-            username,
-            password,
-        });
-
-        this.channel = await this.connection.createChannel();
-        await this.setUp();
+    public async connect(hostname: string, username: string, password: string): Promise<Connection> {
+        try {
+            this.connection = await connect({
+                protocol: 'amqp',
+                hostname,
+                port: 5672,
+                username,
+                password,
+            });
+            this.channel = await this.connection.createChannel();
+            await this.setUp();
+        } catch (e) {
+            throw e;
+        }
 
         const messagePool = new Map<string, ConsumeMessage>();
         const emitter = MessageEmitter.getMessageEmitter();
@@ -85,33 +95,37 @@ export default class RabbitMQConnectionFacade {
             }
         });
 
-        this.channel.consume(`${this.queue}`, (msg: ConsumeMessage): void => {
-            if (msg.properties.appId === this.appName) {
-                if (msg.properties.messageId) {
-                    const descriptor = msg.fields.routingKey;
+        try {
+            await this.channel.consume(`${this.queue}`, (msg: ConsumeMessage): void => {
+                if (msg.properties.appId === this.appName) {
+                    if (msg.properties.messageId) {
+                        const descriptor = msg.fields.routingKey;
 
-                    messagePool.set(msg.properties.messageId, msg);
-                    const message = new JSONMessage(
-                        descriptor,
-                        msg.content,
-                        msg.properties.messageId,
-                        msg.properties.timestamp,
-                        msg.properties.headers.parentMessage,
-                    );
-                    emitter.emit(descriptor, message);
+                        messagePool.set(msg.properties.messageId, msg);
+                        const message = new JSONMessage(
+                            descriptor,
+                            msg.content,
+                            msg.properties.messageId,
+                            msg.properties.timestamp,
+                            msg.properties.headers.parentMessage,
+                        );
+                        emitter.emit(descriptor, message);
+                    } else {
+                        this.channel.ack(msg);
+                    }
                 } else {
                     this.channel.ack(msg);
                 }
-            } else {
-                this.channel.ack(msg);
-            }
-        });
+            });
+            return this.connection;
+        } catch (e) {
+            throw e;
+        }
     }
 
-    public publish(message: Message, alternativeExchange: string = null): void {
+    public publish(message: Message, alternativeExchange: string = null): boolean {
         const exchange = alternativeExchange ? alternativeExchange : this.main_bus;
-
-        this.channel.publish(exchange, message.getDescriptor(), Buffer.from(message.getSerializedContent()), {
+        return this.channel.publish(exchange, message.getDescriptor(), Buffer.from(message.getSerializedContent()), {
             headers: { parentMessage: message.getParentMessage() },
             persistent: true,
             messageId: message.getUUID(),
@@ -120,30 +134,35 @@ export default class RabbitMQConnectionFacade {
         });
     }
 
-    public async subscribe(descriptor: string): Promise<void> {
-        await this.channel.bindQueue(this.queue, this.exchange, descriptor);
+    public async subscribe(descriptor: string): Promise<string> {
+        try {
+            await this.channel.bindQueue(this.queue, this.exchange, descriptor);
+            return descriptor;
+        } catch (e) {
+            throw e;
+        }
     }
 
-    private async setUp(): Promise<void> {
+    private async setUp(): Promise<boolean> {
         /* Creating Exchanges and queues */
-        await this.channel.assertExchange(this.main_bus, 'fanout', {
-            durable: true,
-            autoDelete: false,
-        });
-        await this.channel.assertExchange(this.exchange, 'direct', {
-            durable: true,
-            autoDelete: false,
-        });
-        await this.channel.assertExchange(this.deadLetterExchange, 'fanout', {
-            durable: true,
-            autoDelete: false,
-        });
-        await this.channel.assertQueue(this.queue, {
-            durable: true,
-            autoDelete: false,
-            deadLetterExchange: this.deadLetterExchange,
-        });
         try {
+            await this.channel.assertExchange(this.main_bus, 'fanout', {
+                durable: true,
+                autoDelete: false,
+            });
+            await this.channel.assertExchange(this.exchange, 'direct', {
+                durable: true,
+                autoDelete: false,
+            });
+            await this.channel.assertExchange(this.deadLetterExchange, 'fanout', {
+                durable: true,
+                autoDelete: false,
+            });
+            await this.channel.assertQueue(this.queue, {
+                durable: true,
+                autoDelete: false,
+                deadLetterExchange: this.deadLetterExchange,
+            });
             await this.channel.assertQueue(this.retryQueue, {
                 durable: true,
                 autoDelete: false,
@@ -152,20 +171,27 @@ export default class RabbitMQConnectionFacade {
                     'x-message-ttl': this.delayRetry * 1000,
                 },
             });
+            /* Creating the basic bindings */
+            await this.channel.bindExchange(this.exchange, this.main_bus, '');
+            await this.channel.bindQueue(this.retryQueue, this.deadLetterExchange, '');
         } catch (e) {
             throw e;
         }
-
-        /* Creating the basic bindings */
-        await this.channel.bindExchange(this.exchange, this.main_bus, '');
-        await this.channel.bindQueue(this.retryQueue, this.deadLetterExchange, '');
+        return true;
     }
 
-    public async subscribeAll(descriptors: string[]): Promise<void> {
+    public async subscribeAll(descriptors: string[]): Promise<boolean> {
         if (Array.isArray(descriptors)) {
             for (const descriptor of descriptors) {
-                await this.subscribe(descriptor);
+                try {
+                    await this.subscribe(descriptor);
+                } catch (e) {
+                    throw e;
+                }
             }
+            return true;
+        } else {
+            return false;
         }
     }
 }

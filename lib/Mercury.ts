@@ -40,15 +40,19 @@ export default class Mercury {
         }
     }
 
-    public async init(): Promise<void> {
-        await this.messageBus.configure({
-            brokerHostName: this.brokerHostName,
-            brokerUserName: this.brokerUserName,
-            brokerPassword: this.brokerPassword,
-            appName: this.appName,
-            serviceName: this.serviceName,
-            retryDelay: this.retryDelay,
-        });
+    public async init(): Promise<boolean> {
+        try {
+            return await this.messageBus.configure({
+                brokerHostName: this.brokerHostName,
+                brokerUserName: this.brokerUserName,
+                brokerPassword: this.brokerPassword,
+                appName: this.appName,
+                serviceName: this.serviceName,
+                retryDelay: this.retryDelay,
+            });
+        } catch (e) {
+            throw e;
+        }
     }
 
     public async terminate(): Promise<void> {
