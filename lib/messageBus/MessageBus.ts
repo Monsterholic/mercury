@@ -8,6 +8,6 @@ export interface OptionsMap {
 }
 
 export default interface MessageBus {
-    configure(args: OptionsMap): Promise<void>;
-    terminate(): Promise<void>;
+    configure(args: OptionsMap): Promise<boolean>;
+    terminate(): Promise<boolean>;
 }

@@ -3,7 +3,7 @@ import MessageEmitter from '../messageBus/MessageBusEventEmitter';
 import Message from '../message/Message';
 
 const handler = (messageDescriptor: string = null, maxRetries: number = null): MethodDecorator => {
-    return (target, propertyKey: string, propertyDescriptor: PropertyDescriptor): PropertyDescriptor => {
+    return (_target, _propertyKey: string, propertyDescriptor: PropertyDescriptor): PropertyDescriptor => {
         if (messageDescriptor) {
             if (!Reflect.hasMetadata('descriptors', Mercury.prototype.constructor)) {
                 Reflect.defineMetadata('descriptors', [], Mercury.prototype.constructor);
@@ -18,7 +18,7 @@ const handler = (messageDescriptor: string = null, maxRetries: number = null): M
         }
 
         const original = propertyDescriptor.value;
-        const decoratedFunction = async (...args): Promise<Message[]> => {
+        const decoratedFunction = async (...args: any): Promise<Message[]> => {
             let message = null;
             if (Array.isArray(args)) {
                 message = args.find((arg: Message): boolean => arg instanceof Message);
@@ -39,7 +39,7 @@ const handler = (messageDescriptor: string = null, maxRetries: number = null): M
                     }
                     MessageEmitter.getMessageEmitter().emit(
                         MessageEmitter.MESSAGE_PROCESS_SUCCESS,
-                        message.getUUID(),
+                        resultingMessages.length ? message.getUUID() : null,
                         resultingMessages,
                     );
                 } else {
@@ -48,7 +48,6 @@ const handler = (messageDescriptor: string = null, maxRetries: number = null): M
                 return result;
             } catch (e) {
                 if (message) {
-                    console.log(e.toString());
                     MessageEmitter.getMessageEmitter().emit(
                         MessageEmitter.MESSAGE_PROCESS_ERROR,
                         e,
