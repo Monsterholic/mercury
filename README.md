@@ -156,6 +156,42 @@ In this case,function will not be called for any new message.but now you can con
 above @handler decorator is chained with another decorator provided by 'inversify-express-utils' package to automatic routing.Any Messages
 or Array of messages returned here will be published in the message bus.If the returned value is not a Message instance, then it's ignored.
 
+### Events in process
+
+You can give you data being processed by separate handlers if you want to save the event to a database for example
+Follow example with mongoose:
+
+EventRepository.ts
+
+```javascript
+import { StorageEvent } from 'mercury-messenger'
+import { Schema, model } from 'mongoose'
+
+const eventSchema = Schema({
+    eventName: { type: String },
+    dataEvent: { type: Object }
+})
+
+const EventModel = model('EventStore', eventSchema)
+
+export class EventRepository {
+
+    @StoreEvent()
+    public async function save( args: Message ): Promise<void> {
+        await EventModel.create([args])
+        return;
+    }
+}
+```
+
+```javascript
+import Mercury from 'mercury-messenger';
+import './EventRepository';
+
+let mercury = new Mercury('rabbitmq', 'localhost', 'user', 'password', 'testApp', 'testService');
+mercury.init();
+```
+
 ## TODO
 
 -   Exponential retry strategy with max retry using DLE (dead letter)
