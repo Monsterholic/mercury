@@ -39,7 +39,7 @@ const handler = (messageDescriptor: string = null, maxRetries: number = null): M
                     }
                     MessageEmitter.getMessageEmitter().emit(
                         MessageEmitter.MESSAGE_PROCESS_SUCCESS,
-                        resultingMessages.length ? message.getUUID() : null,
+                        message.getUUID(),
                         resultingMessages,
                     );
                 } else {

@@ -1,68 +1,107 @@
 import Mercury, { handler, JSONMessage, BrokerType } from '../lib/index';
-import { expect, assert } from 'chai';
 import 'mocha';
+import * as chai from 'chai';
 import * as sinon from 'sinon';
+import * as sinonChai from 'sinon-chai';
+
+chai.should();
+chai.use(sinonChai);
 
 // A little hacky thing, we must be able to expect on value to assure that the message
 // was send correctly
-const spy = sinon.spy();
+const spyUserCreatedMessage = sinon.spy();
+const spyOrderCreatedMessage = sinon.spy();
+const spyOrderSucceededMessage = sinon.spy();
 
-const testObject = { message: 'User sucessfully created', amount: 5 };
+const createUserCommand = { name: 'cl3dson', age: 25 };
+const createOrderComand = { product: 'blackBox', price: 200 };
 
 class TestHandler {
+    //handlers
     @handler('user-created')
-    public created(message: JSONMessage): void {
-        const content = message.getContent();
-        spy(content);
+    public userCreated(message: JSONMessage): void {
+        let content = message.getContent();
+        spyUserCreatedMessage(content);
+    }
+
+    @handler('order-created')
+    public orderCreated(message: JSONMessage): void {
+        let content = message.getContent();
+        spyOrderCreatedMessage(content);
+    }
+
+    @handler('order-succeeded')
+    public orderSucceeded(message: JSONMessage): void {
+        let content = message.getContent();
+        spyOrderSucceededMessage(content);
+    }
+    //publishers
+    @handler()
+    public createUserCommand(message: object): JSONMessage {
+        return new JSONMessage('user-created', message);
     }
 
     @handler()
-    public publish(message: object): JSONMessage {
-        return new JSONMessage('user-created', message);
+    public createOrderCommand(message: object): JSONMessage[] {
+        return [new JSONMessage('order-created', message), new JSONMessage('order-succeeded', message)];
     }
 }
 
-describe('connection', () => {
-    it('should throw an exception on connection failure', async () => {
-        const mercury = new Mercury(BrokerType.RABBITMQ, 'localhost', 'unused', 'unused', 'testApp', 'testService');
-        try {
-            await mercury.init();
-            mercury.terminate();
-        } catch (e) {
-            assert.instanceOf(e, Error);
-            await mercury.terminate();
-        }
+describe('Broker Connection', () => {
+    describe('Connection Error', () => {
+        it('should throw an exception on connection failure', async () => {
+            const mercury = new Mercury(BrokerType.RABBITMQ, 'localhost', 'unused', 'unused', 'testApp', 'testService');
+            try {
+                await mercury.init();
+                await mercury.terminate();
+            } catch (e) {
+                chai.assert.instanceOf(e, Error);
+                await mercury.terminate();
+            }
+        });
     });
+    describe('Connection', () => {
+        it('should connect to rabbitmq broker', async () => {
+            const mercury = new Mercury(BrokerType.RABBITMQ, 'localhost', 'guest', 'guest', 'testApp', 'testService');
+            const initialized = await mercury.init();
+            chai.expect(initialized).to.be.true;
 
-    it('should connect to rabbitmq broker', async () => {
-        const mercury = new Mercury(BrokerType.RABBITMQ, 'localhost', 'guest', 'guest', 'test', 'connection');
+            describe('messaging tests', () => {
+                const handler = new TestHandler();
+                after(() => mercury.terminate());
 
-        const initialized = await mercury.init();
-        expect(initialized).to.be.true;
-        mercury.terminate();
-    });
-});
+                it('can publish user created message', () => {
+                    handler.createUserCommand(createUserCommand);
+                });
 
-describe('message', () => {
-    const handler = new TestHandler();
-    let mercury: Mercury;
+                it('can publish order created and order succeeded message', () => {
+                    handler.createOrderCommand(createOrderComand);
+                });
 
-    beforeEach(() => {
-        mercury = new Mercury(BrokerType.RABBITMQ, 'localhost', 'guest', 'guest', 'test', 'message');
+                it('can consume user created message ', () => {
+                    setTimeout(() => {
+                        spyUserCreatedMessage.should.have.been.calledOnceWith(createUserCommand);
+                    }, 500);
+                });
 
-        return mercury.init();
-    });
+                it('can consume order created message ', () => {
+                    setTimeout(() => {
+                        spyOrderCreatedMessage.should.have.been.calledOnceWith(createOrderComand);
+                    }, 500);
+                });
 
-    afterEach(() => mercury.terminate());
+                it('can consume order succeeded message ', () => {
+                    setTimeout(() => {
+                        spyOrderSucceededMessage.should.have.been.calledOnceWith(createOrderComand);
+                    }, 500);
+                });
 
-    it('can send message', () => {
-        handler.publish(testObject);
-    });
-
-    it('can consume message', done => {
-        setTimeout(() => {
-            expect(spy.withArgs(testObject).calledOnce).to.be.true;
-            done();
-        }, 10);
+                it('should terminate broker connection', done => {
+                    setTimeout(() => {
+                        done();
+                    }, 1000);
+                });
+            });
+        });
     });
 });
