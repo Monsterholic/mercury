@@ -4,7 +4,7 @@ import MessageEmitter from '../messageBus/MessageBusEventEmitter';
 import JSONMessage from '../message/JSONMessage';
 
 export default class RabbitMQConnectionFacade {
-    private readonly main_bus = 'mercury_bus';
+    private readonly main_bus: string = 'mercury_bus';
     private connection: Connection;
     private channel: Channel;
     private readonly exchange: string;
@@ -21,6 +21,21 @@ export default class RabbitMQConnectionFacade {
         this.retryQueue = `${this.queue}_retry`;
         this.appName = appName;
         this.delayRetry = delayRetry;
+    }
+
+    public async subscribeAll(descriptors: string[]): Promise<boolean> {
+        if (Array.isArray(descriptors)) {
+            for (const descriptor of descriptors) {
+                try {
+                    await this.subscribe(descriptor);
+                } catch (e) {
+                    throw e;
+                }
+            }
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public async disconnect(): Promise<boolean> {
@@ -42,11 +57,11 @@ export default class RabbitMQConnectionFacade {
     public async connect(hostname: string, username: string, password: string): Promise<Connection> {
         try {
             this.connection = await connect({
-                protocol: 'amqp',
                 hostname,
-                port: 5672,
-                username,
                 password,
+                port: 5672,
+                protocol: 'amqp',
+                username,
             });
             this.connection.on('error', () => () => {});
             this.channel = await this.connection.createChannel();
@@ -169,29 +184,29 @@ export default class RabbitMQConnectionFacade {
         /* Creating Exchanges and queues */
         try {
             await this.channel.assertExchange(this.main_bus, 'fanout', {
-                durable: true,
                 autoDelete: false,
+                durable: true,
             });
             await this.channel.assertExchange(this.exchange, 'direct', {
-                durable: true,
                 autoDelete: false,
+                durable: true,
             });
             await this.channel.assertExchange(this.deadLetterExchange, 'fanout', {
-                durable: true,
                 autoDelete: false,
+                durable: true,
             });
             await this.channel.assertQueue(this.queue, {
-                durable: true,
                 autoDelete: false,
                 deadLetterExchange: this.deadLetterExchange,
+                durable: true,
             });
             await this.channel.assertQueue(this.retryQueue, {
-                durable: true,
-                autoDelete: false,
-                deadLetterExchange: this.exchange,
                 arguments: {
                     'x-message-ttl': this.delayRetry * 1000,
                 },
+                autoDelete: false,
+                deadLetterExchange: this.exchange,
+                durable: true,
             });
             /* Creating the basic bindings */
             await this.channel.bindExchange(this.exchange, this.main_bus, '');
@@ -200,20 +215,5 @@ export default class RabbitMQConnectionFacade {
             throw e;
         }
         return true;
-    }
-
-    public async subscribeAll(descriptors: string[]): Promise<boolean> {
-        if (Array.isArray(descriptors)) {
-            for (const descriptor of descriptors) {
-                try {
-                    await this.subscribe(descriptor);
-                } catch (e) {
-                    throw e;
-                }
-            }
-            return true;
-        } else {
-            return false;
-        }
     }
 }

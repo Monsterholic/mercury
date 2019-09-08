@@ -5,6 +5,8 @@ export enum BrokerType {
     RABBITMQ = 'RABBITMQ',
 }
 
+const DEFAULT_RETRY_DELAY_TIME = 60;
+
 export default class Mercury {
     private messageBus: MessageBus;
     private appName: string;
@@ -12,23 +14,23 @@ export default class Mercury {
     private brokerHostName: string;
     private brokerUserName: string;
     private brokerPassword: string;
-    private retryDelay: number;
+    private retryDelayTime: number;
 
     public constructor(
-        brokerType: BrokerType,
+        brokerType: string,
         brokerHostName: string,
         brokerUserName: string,
         brokerPassword: string,
         appName: string,
         serviceName: string,
-        retryDelay = 60,
+        retryDelayTime = DEFAULT_RETRY_DELAY_TIME,
     ) {
         this.appName = appName;
         this.serviceName = serviceName;
         this.brokerHostName = brokerHostName;
         this.brokerUserName = brokerUserName;
         this.brokerPassword = brokerPassword;
-        this.retryDelay = retryDelay;
+        this.retryDelayTime = retryDelayTime;
 
         switch (brokerType) {
             case BrokerType.RABBITMQ:
@@ -48,7 +50,7 @@ export default class Mercury {
                 brokerPassword: this.brokerPassword,
                 appName: this.appName,
                 serviceName: this.serviceName,
-                retryDelay: this.retryDelay,
+                retryDelay: this.retryDelayTime,
             });
         } catch (e) {
             throw e;

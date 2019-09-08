@@ -4,6 +4,9 @@ import * as chai from 'chai';
 import * as sinon from 'sinon';
 import * as sinonChai from 'sinon-chai';
 
+const AWAIT_MESSAGE_TIME_MS = 500;
+const AWAIT_END_TIME_MS = 1000;
+
 chai.should();
 chai.use(sinonChai);
 
@@ -20,19 +23,19 @@ class TestHandler {
     //handlers
     @handler('user-created')
     public userCreated(message: JSONMessage): void {
-        let content = message.getContent();
+        const content = message.getContent();
         spyUserCreatedMessage(content);
     }
 
     @handler('order-created')
     public orderCreated(message: JSONMessage): void {
-        let content = message.getContent();
+        const content = message.getContent();
         spyOrderCreatedMessage(content);
     }
 
     @handler('order-succeeded')
     public orderSucceeded(message: JSONMessage): void {
-        let content = message.getContent();
+        const content = message.getContent();
         spyOrderSucceededMessage(content);
     }
     //publishers
@@ -81,25 +84,25 @@ describe('Broker Connection', () => {
                 it('can consume user created message ', () => {
                     setTimeout(() => {
                         spyUserCreatedMessage.should.have.been.calledOnceWith(createUserCommand);
-                    }, 500);
+                    }, AWAIT_MESSAGE_TIME_MS);
                 });
 
                 it('can consume order created message ', () => {
                     setTimeout(() => {
                         spyOrderCreatedMessage.should.have.been.calledOnceWith(createOrderComand);
-                    }, 500);
+                    }, AWAIT_MESSAGE_TIME_MS);
                 });
 
                 it('can consume order succeeded message ', () => {
                     setTimeout(() => {
                         spyOrderSucceededMessage.should.have.been.calledOnceWith(createOrderComand);
-                    }, 500);
+                    }, AWAIT_MESSAGE_TIME_MS);
                 });
 
                 it('should terminate broker connection', done => {
                     setTimeout(() => {
                         done();
-                    }, 1000);
+                    }, AWAIT_END_TIME_MS);
                 });
             });
         });

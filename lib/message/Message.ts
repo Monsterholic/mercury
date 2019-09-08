@@ -1,9 +1,9 @@
 import * as uuid from 'uuid';
 
 export default abstract class Message {
+    protected readonly content: any;
     private readonly uuid: string;
     private readonly descriptor: string;
-    protected readonly content;
     private readonly creationDate: Date;
     private parentMessage: string;
 
@@ -29,7 +29,7 @@ export default abstract class Message {
         return this.parentMessage;
     }
 
-    public abstract getContent();
+    public abstract getContent(): any;
     public abstract getSerializedContent(): string;
 
     public getDescriptor(): string {
