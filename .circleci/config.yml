@@ -20,6 +20,7 @@ jobs:
                       - v1-dependencies-
             - run: npm install
             - run: sleep 10
+            - run: yarn test
             - run: yarn test-coverage
             - run: yarn coverage
             - save_cache:
