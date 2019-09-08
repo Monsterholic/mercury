@@ -1,6 +1,6 @@
 {
     "name": "mercury-messenger",
-    "version": "1.1.26",
+    "version": "1.1.29",
     "description": "Messaging Helper for Event Driven Systems",
     "main": "dist/lib/index.js",
     "types": "dist//lib/index.d.ts",
@@ -8,7 +8,9 @@
         "dist/lib/**/*"
     ],
     "scripts": {
-        "test": "jest --detectOpenHandles",
+        "coverage": "nyc report --reporter=text-lcov | codacy-coverage",
+        "test-coverage": "nyc mocha -r ts-node/register --project tsconfig.spec.json --reporter spec tests/**/*.spec.ts",
+        "test": "mocha -r ts-node/register --project tsconfig.spec.json --reporter spec tests/**/*.spec.ts",
         "lint": "eslint '{lib,tests}/**/*.{ts,tsx}' --fix",
         "build": "tsc"
     },
@@ -54,25 +56,28 @@
     },
     "homepage": "https://github.com/Monsterholic/mercury#readme",
     "devDependencies": {
-        "@babel/core": "^7.5.5",
-        "@babel/preset-env": "^7.5.5",
-        "@babel/preset-typescript": "^7.3.3",
-        "@types/jest": "^24.0.18",
+        "@types/chai": "^4.2.0",
+        "@types/mocha": "^5.2.7",
         "@types/node": "^10.14.9",
+        "@types/sinon": "^7.0.13",
+        "@types/sinon-chai": "^3.2.3",
         "@typescript-eslint/eslint-plugin": "^2.0.0",
         "@typescript-eslint/parser": "^2.0.0",
-        "babel-jest": "^24.9.0",
+        "chai": "^4.2.0",
+        "codacy-coverage": "^3.4.0",
         "eslint": "^5.16.0",
         "eslint-config-airbnb-base": "^13.1.0",
         "eslint-config-prettier": "^6.1.0",
         "eslint-plugin-import": "^2.17.2",
         "eslint-plugin-prettier": "^3.1.0",
         "husky": "^3.0.3",
-        "jest": "^24.9.0",
-        "mocha": "^6.1.4",
+        "mocha": "^6.2.0",
+        "nyc": "^14.1.1",
         "prettier": "^1.18.2",
         "pretty-quick": "^1.11.1",
-        "ts-jest": "^24.0.2"
+        "sinon": "^7.4.1",
+        "sinon-chai": "^3.3.0",
+        "ts-node": "^8.3.0"
     },
     "dependencies": {
         "@types/amqplib": "^0.5.11",
@@ -86,18 +91,12 @@
             "pre-commit": "tsc && pretty-quick --staged"
         }
     },
-    "jest": {
-        "collectCoverageFrom": [
-            "lib/**/*.{js,jsx,ts,tsx}",
-            "!lib/**/*.d.ts"
+    "nyc": {
+        "include": [
+            "lib/**/*.ts"
         ],
-        "preset": "ts-jest",
-        "testRegex": "(/tests/.*\\.(test|spec))\\.[jt]sx?$"
-    },
-    "babel": {
-        "presets": [
-            "@babel/preset-env",
-            "@babel/preset-typescript"
+        "extension": [
+            ".ts"
         ]
     }
 }

@@ -5,6 +5,8 @@ export enum BrokerType {
     RABBITMQ = 'RABBITMQ',
 }
 
+const DEFAULT_RETRY_DELAY_TIME = 60;
+
 export default class Mercury {
     private messageBus: MessageBus;
     private appName: string;
@@ -12,23 +14,23 @@ export default class Mercury {
     private brokerHostName: string;
     private brokerUserName: string;
     private brokerPassword: string;
-    private retryDelay: number;
+    private retryDelayTime: number;
 
     public constructor(
-        brokerType: BrokerType,
+        brokerType: string,
         brokerHostName: string,
         brokerUserName: string,
         brokerPassword: string,
         appName: string,
         serviceName: string,
-        retryDelay = 60,
+        retryDelayTime = DEFAULT_RETRY_DELAY_TIME,
     ) {
         this.appName = appName;
         this.serviceName = serviceName;
         this.brokerHostName = brokerHostName;
         this.brokerUserName = brokerUserName;
         this.brokerPassword = brokerPassword;
-        this.retryDelay = retryDelay;
+        this.retryDelayTime = retryDelayTime;
 
         switch (brokerType) {
             case BrokerType.RABBITMQ:
@@ -40,18 +42,22 @@ export default class Mercury {
         }
     }
 
-    public async init(): Promise<void> {
-        await this.messageBus.configure({
-            brokerHostName: this.brokerHostName,
-            brokerUserName: this.brokerUserName,
-            brokerPassword: this.brokerPassword,
-            appName: this.appName,
-            serviceName: this.serviceName,
-            retryDelay: this.retryDelay,
-        });
+    public async init(): Promise<boolean> {
+        try {
+            return await this.messageBus.configure({
+                brokerHostName: this.brokerHostName,
+                brokerUserName: this.brokerUserName,
+                brokerPassword: this.brokerPassword,
+                appName: this.appName,
+                serviceName: this.serviceName,
+                retryDelay: this.retryDelayTime,
+            });
+        } catch (e) {
+            throw e;
+        }
     }
 
-    public async terminate(): Promise<void> {
-        await this.messageBus.terminate();
+    public async terminate(): Promise<boolean> {
+        return await this.messageBus.terminate();
     }
 }
