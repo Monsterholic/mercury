@@ -1,4 +1,6 @@
+import { Message } from '..';
+
 export abstract class Handler {
     constructor() {}
-    abstract handle(string): any;
+    abstract handle(msg: Message): any;
 }
