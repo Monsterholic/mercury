@@ -1,5 +1,6 @@
 import RabbitMQMessageBus from './messageBus/RabbitMQMessageBus';
 import MessageBus from './messageBus/MessageBus';
+import { Handler } from './handler/Handler';
 
 export enum BrokerType {
     RABBITMQ = 'RABBITMQ',
@@ -15,6 +16,7 @@ export default class Mercury {
     private brokerUserName: string;
     private brokerPassword: string;
     private retryDelayTime: number;
+    static registerHandles: Map<string, any> = new Map();
 
     public constructor(
         brokerType: string,
@@ -55,6 +57,10 @@ export default class Mercury {
         } catch (e) {
             throw e;
         }
+    }
+
+    public useHandler(handler: Handler) {
+        Mercury.registerHandles.set(handler.constructor.name, handler);
     }
 
     public async terminate(): Promise<boolean> {
