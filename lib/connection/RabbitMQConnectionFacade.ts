@@ -23,17 +23,13 @@ export default class RabbitMQConnectionFacade {
         this.delayRetry = delayRetry;
     }
 
-    public async subscribeAll(descriptors: string[]): Promise<boolean> {
-        if (Array.isArray(descriptors)) {
-            for (const descriptor of descriptors) {
-                try {
-                    await this.subscribe(descriptor);
-                } catch (e) {
-                    throw e;
-                }
+    public async subscribeAll(messageBindings: Map<string, string>): Promise<boolean> {
+        try {
+            for (var [key, value] of messageBindings) {
+                await this.subscribe(key);
             }
             return true;
-        } else {
+        } catch (err) {
             return false;
         }
     }
