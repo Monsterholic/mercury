@@ -16,7 +16,7 @@ export default class Mercury {
     private brokerUserName: string;
     private brokerPassword: string;
     private retryDelayTime: number;
-    static registerHandles: Map<string, any> = new Map();
+    static registerHandlers: Map<string, Handler> = new Map();
 
     public constructor(
         brokerType: string,
@@ -60,7 +60,7 @@ export default class Mercury {
     }
 
     public useHandler(handler: Handler) {
-        Mercury.registerHandles.set(handler.constructor.name, handler);
+        Mercury.registerHandlers.set(handler.constructor.name, handler);
     }
 
     public async terminate(): Promise<boolean> {
