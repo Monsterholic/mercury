@@ -2,6 +2,7 @@ import { Channel, connect, Connection, ConsumeMessage } from 'amqplib';
 import Message from '../message/Message';
 import MessageEmitter from '../messageBus/MessageBusEventEmitter';
 import JSONMessage from '../message/JSONMessage';
+import Mercury from '..';
 
 export default class RabbitMQConnectionFacade {
     private readonly main_bus: string = 'mercury_bus';
@@ -133,7 +134,8 @@ export default class RabbitMQConnectionFacade {
                             msg.properties.timestamp,
                             msg.properties.headers.parentMessage,
                         );
-                        emitter.emit(descriptor, message);
+                        this.searchHandler(descriptor, message);
+                        // emitter.emit(descriptor, message);
                     } else {
                         this.channel.ack(msg);
                     }
@@ -174,6 +176,12 @@ export default class RabbitMQConnectionFacade {
         } catch (e) {
             throw e;
         }
+    }
+
+    public searchHandler(descriptor, message) {
+        let handles = Mercury.registerHandlers;
+        console.log('handles', handles);
+        console.log('CHEGOU UMA MSG', { descriptor, message });
     }
 
     private async setUp(): Promise<boolean> {
