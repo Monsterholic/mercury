@@ -2,6 +2,7 @@ import { Channel, connect, Connection, ConsumeMessage } from 'amqplib';
 import Message from '../message/Message';
 import MessageEmitter from '../messageBus/MessageBusEventEmitter';
 import JSONMessage from '../message/JSONMessage';
+import Mercury from '..';
 
 export default class RabbitMQConnectionFacade {
     private readonly main_bus: string = 'mercury_bus';
@@ -13,6 +14,7 @@ export default class RabbitMQConnectionFacade {
     private readonly retryQueue: string;
     private readonly appName: string;
     private delayRetry: number;
+    private messagePool: Map<string, ConsumeMessage>;
 
     public constructor(serviceName: string, appName: string, delayRetry: number) {
         this.exchange = serviceName;
@@ -21,19 +23,16 @@ export default class RabbitMQConnectionFacade {
         this.retryQueue = `${this.queue}_retry`;
         this.appName = appName;
         this.delayRetry = delayRetry;
+        this.messagePool = new Map<string, ConsumeMessage>();
     }
 
-    public async subscribeAll(descriptors: string[]): Promise<boolean> {
-        if (Array.isArray(descriptors)) {
-            for (const descriptor of descriptors) {
-                try {
-                    await this.subscribe(descriptor);
-                } catch (e) {
-                    throw e;
-                }
+    public async subscribeAll(messageBindings: Map<string, string>): Promise<boolean> {
+        try {
+            for (var [key, value] of messageBindings) {
+                await this.subscribe(key);
             }
             return true;
-        } else {
+        } catch (err) {
             return false;
         }
     }
@@ -71,7 +70,6 @@ export default class RabbitMQConnectionFacade {
             throw e;
         }
 
-        const messagePool = new Map<string, ConsumeMessage>();
         const emitter = MessageEmitter.getMessageEmitter();
 
         emitter.on('error', () => {});
@@ -79,9 +77,9 @@ export default class RabbitMQConnectionFacade {
         emitter.on(
             MessageEmitter.MESSAGE_PROCESS_ERROR,
             (error: Error, messageId: string, mercuryMessage: Message, maxRetries: number) => {
-                const message: ConsumeMessage = messagePool.get(messageId);
+                const message: ConsumeMessage = this.messagePool.get(messageId);
                 if (message) {
-                    messagePool.delete(messageId);
+                    this.messagePool.delete(messageId);
 
                     maxRetries = maxRetries ? maxRetries : 60;
 
@@ -102,13 +100,13 @@ export default class RabbitMQConnectionFacade {
             if (!messageId) {
                 return;
             }
-            this.channel.ack(messagePool.get(messageId));
+            this.channel.ack(this.messagePool.get(messageId));
             if (resultingMessages) {
                 for (const message of resultingMessages) {
                     this.publish(message);
                 }
             }
-            messagePool.delete(messageId);
+            this.messagePool.delete(messageId);
         });
 
         emitter.on(MessageEmitter.PROCESS_SUCCESS, (resultingMessages: Message[]) => {
@@ -128,16 +126,8 @@ export default class RabbitMQConnectionFacade {
                 if (msg.properties.appId === this.appName) {
                     if (msg.properties.messageId) {
                         const descriptor = msg.fields.routingKey;
-
-                        messagePool.set(msg.properties.messageId, msg);
-                        const message = new JSONMessage(
-                            descriptor,
-                            msg.content,
-                            msg.properties.messageId,
-                            msg.properties.timestamp,
-                            msg.properties.headers.parentMessage,
-                        );
-                        emitter.emit(descriptor, message);
+                        this.messagePool.set(msg.properties.messageId, msg);
+                        this.dispatchMessage(descriptor, msg);
                     } else {
                         this.channel.ack(msg);
                     }
@@ -177,6 +167,56 @@ export default class RabbitMQConnectionFacade {
             return descriptor;
         } catch (e) {
             throw e;
+        }
+    }
+
+    public async dispatchMessage(descriptor: string, msg: ConsumeMessage) {
+        let handlers = Mercury.handlerRegistry;
+
+        if (Reflect.hasMetadata('messageBindings', Mercury.prototype.constructor)) {
+            let bindings: Map<string, string> = Reflect.getMetadata('messageBindings', Mercury.prototype.constructor);
+            let handlerClassName = bindings.get(descriptor);
+            if (handlerClassName) {
+                if (handlers.has(handlerClassName)) {
+                    const handler = handlers.get(handlerClassName);
+                    try {
+                        const MercuryMessage = new JSONMessage(
+                            descriptor,
+                            msg.content,
+                            msg.properties.messageId,
+                            msg.properties.timestamp,
+                            msg.properties.headers.parentMessage,
+                        );
+                        const result = await handler.handle(MercuryMessage);
+                        const resultMessages =
+                            Array.isArray(result) && result.every(r => r instanceof Message)
+                                ? result
+                                : result instanceof Message
+                                ? [result]
+                                : null;
+
+                        this.channel.ack(this.messagePool.get(msg.properties.messageId));
+                        if (resultMessages) {
+                            for (const message of resultMessages) {
+                                this.publish(message);
+                            }
+                        }
+                        this.messagePool.delete(msg.properties.messageId);
+                    } catch (e) {
+                        this.messagePool.delete(msg.properties.messageId);
+                        if (
+                            !msg.properties.headers['x-death'] ||
+                            (msg.properties.headers['x-death'] && msg.properties.headers['x-death'][0].count < 14)
+                        ) {
+                            this.channel.nack(msg, false, false);
+                        } else {
+                            this.channel.ack(msg);
+                        }
+                    }
+                } else {
+                    this.channel.ack(msg);
+                }
+            }
         }
     }
 

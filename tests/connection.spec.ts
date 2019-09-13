@@ -19,36 +19,36 @@ const spyOrderSucceededMessage = sinon.spy();
 const createUserCommand = { name: 'cl3dson', age: 25 };
 const createOrderComand = { product: 'blackBox', price: 200 };
 
-class TestHandler {
-    //handlers
-    @handler('user-created')
-    public userCreated(message: JSONMessage): void {
-        const content = message.getContent();
-        spyUserCreatedMessage(content);
-    }
+// class TestHandler {
+//     //handlers
+//     @handler('user-created')
+//     public userCreated(message: JSONMessage): void {
+//         const content = message.getContent();
+//         spyUserCreatedMessage(content);
+//     }
 
-    @handler('order-created')
-    public orderCreated(message: JSONMessage): void {
-        const content = message.getContent();
-        spyOrderCreatedMessage(content);
-    }
+//     @handler('order-created')
+//     public orderCreated(message: JSONMessage): void {
+//         const content = message.getContent();
+//         spyOrderCreatedMessage(content);
+//     }
 
-    @handler('order-succeeded')
-    public orderSucceeded(message: JSONMessage): void {
-        const content = message.getContent();
-        spyOrderSucceededMessage(content);
-    }
-    //publishers
-    @handler()
-    public createUserCommand(message: object): JSONMessage {
-        return new JSONMessage('user-created', message);
-    }
+//     @handler('order-succeeded')
+//     public orderSucceeded(message: JSONMessage): void {
+//         const content = message.getContent();
+//         spyOrderSucceededMessage(content);
+//     }
+//     //publishers
+//     @handler()
+//     public createUserCommand(message: object): JSONMessage {
+//         return new JSONMessage('user-created', message);
+//     }
 
-    @handler()
-    public createOrderCommand(message: object): JSONMessage[] {
-        return [new JSONMessage('order-created', message), new JSONMessage('order-succeeded', message)];
-    }
-}
+//     @handler()
+//     public createOrderCommand(message: object): JSONMessage[] {
+//         return [new JSONMessage('order-created', message), new JSONMessage('order-succeeded', message)];
+//     }
+// }
 
 describe('Broker Connection', () => {
     describe('Connection Error', () => {
@@ -70,34 +70,34 @@ describe('Broker Connection', () => {
             chai.expect(initialized).to.be.true;
 
             describe('messaging tests', () => {
-                const handler = new TestHandler();
                 after(() => mercury.terminate());
+                // const handler = new TestHandler();
 
-                it('can publish user created message', () => {
-                    handler.createUserCommand(createUserCommand);
-                });
+                // it('can publish user created message', () => {
+                //     handler.createUserCommand(createUserCommand);
+                // });
 
-                it('can publish order created and order succeeded message', () => {
-                    handler.createOrderCommand(createOrderComand);
-                });
+                // it('can publish order created and order succeeded message', () => {
+                //     handler.createOrderCommand(createOrderComand);
+                // });
 
-                it('can consume user created message ', () => {
-                    setTimeout(() => {
-                        spyUserCreatedMessage.should.have.been.calledOnceWith(createUserCommand);
-                    }, AWAIT_MESSAGE_TIME_MS);
-                });
+                // it('can consume user created message ', () => {
+                //     setTimeout(() => {
+                //         spyUserCreatedMessage.should.have.been.calledOnceWith(createUserCommand);
+                //     }, AWAIT_MESSAGE_TIME_MS);
+                // });
 
-                it('can consume order created message ', () => {
-                    setTimeout(() => {
-                        spyOrderCreatedMessage.should.have.been.calledOnceWith(createOrderComand);
-                    }, AWAIT_MESSAGE_TIME_MS);
-                });
+                // it('can consume order created message ', () => {
+                //     setTimeout(() => {
+                //         spyOrderCreatedMessage.should.have.been.calledOnceWith(createOrderComand);
+                //     }, AWAIT_MESSAGE_TIME_MS);
+                // });
 
-                it('can consume order succeeded message ', () => {
-                    setTimeout(() => {
-                        spyOrderSucceededMessage.should.have.been.calledOnceWith(createOrderComand);
-                    }, AWAIT_MESSAGE_TIME_MS);
-                });
+                // it('can consume order succeeded message ', () => {
+                //     setTimeout(() => {
+                //         spyOrderSucceededMessage.should.have.been.calledOnceWith(createOrderComand);
+                //     }, AWAIT_MESSAGE_TIME_MS);
+                // });
 
                 it('should terminate broker connection', done => {
                     setTimeout(() => {
