@@ -1,8 +1,9 @@
 import 'reflect-metadata';
-import handlHandlerDecoratorer from './decorator/MessageHandler';
+import MessageHandler from './decorator/MessageHandler';
 import JSONMessage from './message/JSONMessage';
 import Message from './message/Message';
 import Mercury, { BrokerType } from './Mercury';
+import Publisher from './decorator/Publisher';
 
 export default Mercury;
-export { handlHandlerDecoratorer, Message, JSONMessage, BrokerType };
+export { MessageHandler, Message, JSONMessage, BrokerType, Publisher };
