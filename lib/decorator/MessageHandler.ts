@@ -1,6 +1,6 @@
 import Mercury from '..';
 
-const HandlerDecorator = (messageDescriptor: string) => {
+const MessageHandler = (messageDescriptor: string) => {
     return (constructor: Function) => {
         if (!Reflect.hasMetadata('messageBindings', Mercury.prototype.constructor)) {
             Reflect.defineMetadata('messageBindings', new Map(), Mercury.prototype.constructor);
@@ -10,4 +10,4 @@ const HandlerDecorator = (messageDescriptor: string) => {
     };
 };
 
-export default HandlerDecorator;
+export default MessageHandler;

@@ -1,6 +1,6 @@
 import { Message } from '..';
 
-export abstract class Handler {
+export default abstract class Handler {
     constructor() {}
     abstract handle(msg: Message): any;
 }

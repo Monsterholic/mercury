@@ -1,6 +1,6 @@
 import RabbitMQMessageBus from './messageBus/RabbitMQMessageBus';
 import MessageBus from './messageBus/MessageBus';
-import { Handler } from './handler/Handler';
+import Handler from './handler/Handler';
 
 export enum BrokerType {
     RABBITMQ = 'RABBITMQ',
@@ -9,6 +9,7 @@ export enum BrokerType {
 const DEFAULT_RETRY_DELAY_TIME = 60;
 
 export default class Mercury {
+    public static handlerRegistry: Map<string, Handler> = new Map();
     private messageBus: MessageBus;
     private appName: string;
     private serviceName: string;
@@ -16,7 +17,6 @@ export default class Mercury {
     private brokerUserName: string;
     private brokerPassword: string;
     private retryDelayTime: number;
-    static registerHandlers: Map<string, Handler> = new Map();
 
     public constructor(
         brokerType: string,
@@ -60,7 +60,7 @@ export default class Mercury {
     }
 
     public useHandler(handler: Handler) {
-        Mercury.registerHandlers.set(handler.constructor.name, handler);
+        Mercury.handlerRegistry.set(handler.constructor.name, handler);
     }
 
     public async terminate(): Promise<boolean> {
