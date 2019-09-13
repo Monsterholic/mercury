@@ -1,4 +1,4 @@
-import Mercury, { handler, JSONMessage, BrokerType } from '../lib/index';
+import Mercury, { BrokerType } from '../lib/index';
 import 'mocha';
 import * as chai from 'chai';
 import * as sinon from 'sinon';
