@@ -25,7 +25,7 @@ export default class Mercury {
         brokerPassword: string,
         appName: string,
         serviceName: string,
-        retryDelayTime = DEFAULT_RETRY_DELAY_TIME,
+        retryDelayTime: number = DEFAULT_RETRY_DELAY_TIME,
     ) {
         this.appName = appName;
         this.serviceName = serviceName;
@@ -47,19 +47,19 @@ export default class Mercury {
     public async init(): Promise<boolean> {
         try {
             return await this.messageBus.configure({
-                brokerHostName: this.brokerHostName,
-                brokerUserName: this.brokerUserName,
-                brokerPassword: this.brokerPassword,
                 appName: this.appName,
-                serviceName: this.serviceName,
+                brokerHostName: this.brokerHostName,
+                brokerPassword: this.brokerPassword,
+                brokerUserName: this.brokerUserName,
                 retryDelay: this.retryDelayTime,
+                serviceName: this.serviceName,
             });
         } catch (e) {
             throw e;
         }
     }
 
-    public useHandler(handler: Handler) {
+    public useHandler(handler: Handler): void {
         Mercury.handlerRegistry.set(handler.constructor.name, handler);
     }
 

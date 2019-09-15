@@ -8,7 +8,7 @@ export const spyOrderCreatedHandler = sinon.spy();
 
 @MessageHandler('order-created')
 export default class OrderCreatedHandler extends Handler {
-    handle(message: Message): any {
+    public handle(message: Message): void {
         spyOrderCreatedHandler(message);
     }
 }

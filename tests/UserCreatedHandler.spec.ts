@@ -7,7 +7,7 @@ export const spyUserCreatedMessage = sinon.spy();
 
 @MessageHandler('user-created')
 export default class UserCreatedHandler extends Handler {
-    handle(message: Message): any {
+    public handle(message: Message): void {
         spyUserCreatedMessage(message);
     }
 }

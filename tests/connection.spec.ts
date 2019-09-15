@@ -113,7 +113,7 @@ describe('Broker Connection', () => {
                     it('createOrderCommand from OrderController returns an array of messages', () => {
                         orderResult.should.be.a('array');
                         if (Array.isArray(orderResult)) {
-                            for (let result of orderResult) {
+                            for (const result of orderResult) {
                                 result.should.be.a.instanceOf(JSONMessage);
                             }
                         }

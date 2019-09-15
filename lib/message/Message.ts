@@ -9,7 +9,7 @@ export default abstract class Message {
 
     public constructor(
         descriptor: string,
-        content,
+        content: any,
         id: string = null,
         timestamp: number = null,
         parentMessage: string = null,

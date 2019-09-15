@@ -1,13 +1,13 @@
 import Message from '../message/Message';
 import MessageEmitter from '../messageBus/MessageBusEventEmitter';
 
-const Publisher = () => {
-    return function(target: any, propertyKey: string, propertyDescriptor: PropertyDescriptor) {
+const MessagePublisher = (): MethodDecorator => {
+    return function(target: any, propertyKey: string, propertyDescriptor: PropertyDescriptor): void {
         const originalFunc = propertyDescriptor.value;
 
-        propertyDescriptor.value = function(...args: any[]) {
+        propertyDescriptor.value = function(...args: any[]): Message {
             const result = originalFunc.apply(this, args);
-            let resultingMessages =
+            const resultingMessages =
                 Array.isArray(result) && result.every(r => r instanceof Message)
                     ? result
                     : result instanceof Message
@@ -18,4 +18,4 @@ const Publisher = () => {
         };
     };
 };
-export default Publisher;
+export default MessagePublisher;

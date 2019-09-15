@@ -4,6 +4,9 @@ import MessageEmitter from '../messageBus/MessageBusEventEmitter';
 import JSONMessage from '../message/JSONMessage';
 import Mercury from '..';
 
+const MAX_RETRIES = 14;
+const DEFAULT_MS_STEP = 1000;
+
 export default class RabbitMQConnectionFacade {
     private readonly main_bus: string = 'mercury_bus';
     private connection: Connection;
@@ -13,7 +16,7 @@ export default class RabbitMQConnectionFacade {
     private readonly queue: string;
     private readonly retryQueue: string;
     private readonly appName: string;
-    private delayRetry: number;
+    private readonly delayRetry: number;
     private messagePool: Map<string, ConsumeMessage>;
 
     public constructor(serviceName: string, appName: string, delayRetry: number) {
@@ -28,7 +31,7 @@ export default class RabbitMQConnectionFacade {
 
     public async subscribeAll(messageBindings: Map<string, string>): Promise<boolean> {
         try {
-            for (var [key, value] of messageBindings) {
+            for (const [key] of messageBindings) {
                 await this.subscribe(key);
             }
             return true;
@@ -112,11 +115,11 @@ export default class RabbitMQConnectionFacade {
                 message.getDescriptor(),
                 Buffer.from(message.getSerializedContent()),
                 {
-                    headers: { parentMessage: message.getParentMessage() },
-                    persistent: true,
-                    messageId: message.getUUID(),
-                    timestamp: new Date().getTime(),
                     appId: this.appName,
+                    headers: { parentMessage: message.getParentMessage() },
+                    messageId: message.getUUID(),
+                    persistent: true,
+                    timestamp: new Date().getTime(),
                 },
             );
         } catch (e) {
@@ -134,11 +137,11 @@ export default class RabbitMQConnectionFacade {
     }
 
     public async dispatchMessage(descriptor: string, msg: ConsumeMessage): Promise<void> {
-        let handlers = Mercury.handlerRegistry;
+        const handlers = Mercury.handlerRegistry;
 
         if (Reflect.hasMetadata('messageBindings', Mercury.prototype.constructor)) {
-            let bindings: Map<string, string> = Reflect.getMetadata('messageBindings', Mercury.prototype.constructor);
-            let handlerClassName = bindings.get(descriptor);
+            const bindings: Map<string, string> = Reflect.getMetadata('messageBindings', Mercury.prototype.constructor);
+            const handlerClassName = bindings.get(descriptor);
             if (handlerClassName) {
                 if (handlers.has(handlerClassName)) {
                     const handler = handlers.get(handlerClassName);
@@ -169,7 +172,8 @@ export default class RabbitMQConnectionFacade {
                         this.messagePool.delete(msg.properties.messageId);
                         if (
                             !msg.properties.headers['x-death'] ||
-                            (msg.properties.headers['x-death'] && msg.properties.headers['x-death'][0].count < 14)
+                            (msg.properties.headers['x-death'] &&
+                                msg.properties.headers['x-death'][0].count < MAX_RETRIES)
                         ) {
                             this.channel.nack(msg, false, false);
                         } else {
@@ -205,12 +209,13 @@ export default class RabbitMQConnectionFacade {
             });
             await this.channel.assertQueue(this.retryQueue, {
                 arguments: {
-                    'x-message-ttl': this.delayRetry * 1000,
+                    'x-message-ttl': this.delayRetry * DEFAULT_MS_STEP,
                 },
                 autoDelete: false,
                 deadLetterExchange: this.exchange,
                 durable: true,
             });
+
             /* Creating the basic bindings */
             await this.channel.bindExchange(this.exchange, this.main_bus, '');
             await this.channel.bindQueue(this.retryQueue, this.deadLetterExchange, '');
