@@ -5,12 +5,13 @@ import * as sinon from 'sinon';
 import * as chaiAsPromised from 'chai-as-promised';
 import * as sinonChai from 'sinon-chai';
 import UserController from './UserController.spec';
-import OrderControllerSpec from './OrderController.spec';
 
-import OrderCreatedHandler from './OrderCreatedHandler.spec';
-import OrderSucceededHandler from './OrderSucceededHandler.spec';
 import UserCreatedHandler, { spyUserCreatedMessage } from './UserCreatedHandler.spec';
+import OrderCreatedHandler, { spyOrderCreatedHandler } from './OrderCreatedHandler.spec';
+import OrderSucceededHandler, { spyOrderSucceededHandler } from './OrderSucceededHandler.spec';
+
 import Message from '../lib/message/Message';
+import OrderController from './OrderController.spec';
 
 const AWAIT_MESSAGE_TIME_MS = 500;
 const AWAIT_END_TIME_MS = 1000;
@@ -37,29 +38,37 @@ describe('Broker Connection', () => {
             const mercury = new Mercury('RABBITMQ', 'localhost', 'guest', 'guest', 'testApp', 'testService');
 
             const userCreatedHandler = new UserCreatedHandler();
+            const orderCreatedHandler = new OrderCreatedHandler();
+            const orderSucceededHandler = new OrderSucceededHandler();
+
             mercury.useHandler(userCreatedHandler);
+            mercury.useHandler(orderCreatedHandler);
+            mercury.useHandler(orderSucceededHandler);
 
             await mercury.init().should.eventually.be.fulfilled;
 
             describe('messaging testes', () => {
                 const userController = new UserController();
-                const result = userController.createUserCommand(createUserCommandData);
+                const userResult = userController.createUserCommand(createUserCommandData);
+
+                const orderController = new OrderController();
+                const orderResult = orderController.createOrderCommand(createOrderComandData);
 
                 describe('UserControler', () => {
                     it('createUserCommand from UserControler return JSONMessage', () => {
-                        result.should.be.a.instanceOf(JSONMessage);
+                        userResult.should.be.a.instanceOf(JSONMessage);
                     });
 
                     it('message returned from createUserCommand has correct Content', () => {
-                        result.getContent().should.be.deep.eq(createUserCommandData);
+                        userResult.getContent().should.be.deep.eq(createUserCommandData);
                     });
 
                     it("message returned from createUserCommand has the correct descriptor ('user-created')", () => {
-                        result.getDescriptor().should.be.equals('user-created');
+                        userResult.getDescriptor().should.be.equals('user-created');
                     });
 
                     it('message returned from createUserCommand has an uuid', () => {
-                        result.getUUID().should.be.a('string');
+                        userResult.getUUID().should.be.a('string');
                     });
                 });
 
@@ -75,12 +84,25 @@ describe('Broker Connection', () => {
                         }, AWAIT_MESSAGE_TIME_MS);
                     });
 
-                    it('should consumed message has same content published by user Controller', done => {
+                    it('should consumed message has same content published by UserController', done => {
                         setTimeout(() => {
                             try {
                                 spyUserCreatedMessage.args[0][0]
                                     .getContent()
-                                    .should.have.be.deep.equals(result.getContent());
+                                    .should.be.deep.equals(userResult.getContent());
+                                done();
+                            } catch (e) {
+                                done(e);
+                            }
+                        }, AWAIT_MESSAGE_TIME_MS);
+                    });
+
+                    it('should consumed message has same descriptor published by UserController', done => {
+                        setTimeout(() => {
+                            try {
+                                spyUserCreatedMessage.args[0][0]
+                                    .getDescriptor()
+                                    .should.be.equals(userResult.getDescriptor());
                                 done();
                             } catch (e) {
                                 done(e);
@@ -89,75 +111,104 @@ describe('Broker Connection', () => {
                     });
                 });
 
-                it('should finish connection', done => {
-                    setTimeout(() => {
-                        mercury.terminate().should.eventually.be.fulfilled;
-                        done();
-                    }, AWAIT_END_TIME_MS);
+                describe('OrderController', () => {
+                    it('createOrderCommand from OrderController returns an array of messages', () => {
+                        orderResult.should.be.a('array');
+                        if (Array.isArray(orderResult)) {
+                            for (let result of orderResult) {
+                                result.should.be.a.instanceOf(JSONMessage);
+                            }
+                        }
+                    });
+                });
+
+                describe('OrderCreatedHandler', () => {
+                    it('should consume message published by OrderController', done => {
+                        setTimeout(() => {
+                            try {
+                                spyOrderCreatedHandler.should.have.been.calledOnce;
+                                done();
+                            } catch (e) {
+                                done(e);
+                            }
+                        }, AWAIT_MESSAGE_TIME_MS);
+                    });
+
+                    it('consumed message should have same content published by OrderController', done => {
+                        setTimeout(() => {
+                            try {
+                                spyOrderCreatedHandler.args[0][0]
+                                    .getContent()
+                                    .should.be.deep.equals(orderResult[0].getContent());
+                                done();
+                            } catch (e) {
+                                done(e);
+                            }
+                        }, AWAIT_MESSAGE_TIME_MS);
+                    });
+
+                    it("consumed message should have same descriptor published by OrderController ('order-created')", done => {
+                        setTimeout(() => {
+                            try {
+                                spyOrderCreatedHandler.args[0][0]
+                                    .getDescriptor()
+                                    .should.be.equals(orderResult[0].getDescriptor());
+                                done();
+                            } catch (e) {
+                                done(e);
+                            }
+                        }, AWAIT_MESSAGE_TIME_MS);
+                    });
+                });
+
+                describe('OrderSucceededHandler', () => {
+                    it('should consume message published by OrderController', done => {
+                        setTimeout(() => {
+                            try {
+                                spyOrderSucceededHandler.should.have.been.calledOnce;
+                                done();
+                            } catch (e) {
+                                done(e);
+                            }
+                        }, AWAIT_MESSAGE_TIME_MS);
+                    });
+
+                    it('consumed message should have same content published by OrderController', done => {
+                        setTimeout(() => {
+                            try {
+                                spyOrderSucceededHandler.args[0][0]
+                                    .getContent()
+                                    .should.be.deep.equals(orderResult[1].getContent());
+                                done();
+                            } catch (e) {
+                                done(e);
+                            }
+                        }, AWAIT_MESSAGE_TIME_MS);
+                    });
+
+                    it("consumed message should have same descriptor published by OrderController ('order-succeeded')", done => {
+                        setTimeout(() => {
+                            try {
+                                spyOrderSucceededHandler.args[0][0]
+                                    .getDescriptor()
+                                    .should.be.equals(orderResult[1].getDescriptor());
+                                done();
+                            } catch (e) {
+                                done(e);
+                            }
+                        }, AWAIT_MESSAGE_TIME_MS);
+                    });
+                });
+
+                describe('Connection', () => {
+                    it('should finish connection', done => {
+                        setTimeout(() => {
+                            mercury.terminate().should.eventually.be.fulfilled;
+                            done();
+                        }, AWAIT_END_TIME_MS);
+                    });
                 });
             });
         });
     });
-
-    // describe('Connection', () => {
-    //     it('should connect to rabbitmq broker', async () => {
-    //         const mercury = new Mercury(
-    //             "RABBITMQ",
-    //             'localhost',
-    //             'guest',
-    //             'guest',
-    //             'testApp',
-    //             'testService');
-    //
-    //         //instantiating message handlers
-    //         const orderCreatedHandler = new OrderCreatedHandler();
-    //         const orderSucceededHandler = new OrderSucceededHandler();
-    //         const userCreatedHandler = new UserCreatedHandler();
-    //
-    //         //registering message handlers
-    //         mercury.useHandler(orderCreatedHandler);
-    //         mercury.useHandler(orderSucceededHandler);
-    //         mercury.useHandler(userCreatedHandler);
-    //
-    //         const initialized = await mercury.init();
-    //         chai.expect(initialized).to.be.true;
-    //
-    //         describe('messaging tests', () => {
-    //             after(() => {
-    //                 mercury.terminate()
-    //             });
-    //
-    //             it('can publish user created message from user controller',() => {
-    //                 const userController = new UserController();
-    //                 userController.createUserCommand(createUserCommandData)
-    //             })
-    //
-    //
-    //
-    //             // it('can publish order created and order succeeded message', () => {
-    //             //     const orderController = new OrderControllerSpec()
-    //             //     orderController.createOrderCommand(createOrderComandData)
-    //             // });
-    //             //
-    //             // it('can consume user created message ', () => {
-    //             //     setTimeout(() => {
-    //             //         spyUserCreatedMessage.should.have.been.calledOnceWith(createUserCommandData);
-    //             //     }, AWAIT_MESSAGE_TIME_MS);
-    //             // });
-    //             //
-    //             // it('can consume order created message ', () => {
-    //             //     setTimeout(() => {
-    //             //         spyOrderCreatedMessage.should.have.been.calledOnceWith(createOrderComandData);
-    //             //     }, AWAIT_MESSAGE_TIME_MS);
-    //             // });
-    //             //
-    //             // it('can consume order succeeded message ', () => {
-    //             //     setTimeout(() => {
-    //             //         spyOrderSucceededMessage.should.have.been.calledOnceWith(createOrderComandData);
-    //             //     }, AWAIT_MESSAGE_TIME_MS);
-    //             // });
-    //
-    //         });
-    //     });
-    // });
 });
