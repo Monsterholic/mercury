@@ -72,43 +72,6 @@ export default class RabbitMQConnectionFacade {
 
         const emitter = MessageEmitter.getMessageEmitter();
 
-        emitter.on('error', () => {});
-
-        emitter.on(
-            MessageEmitter.MESSAGE_PROCESS_ERROR,
-            (error: Error, messageId: string, mercuryMessage: Message, maxRetries: number) => {
-                const message: ConsumeMessage = this.messagePool.get(messageId);
-                if (message) {
-                    this.messagePool.delete(messageId);
-
-                    maxRetries = maxRetries ? maxRetries : 60;
-
-                    if (
-                        !message.properties.headers['x-death'] ||
-                        (message.properties.headers['x-death'] &&
-                            message.properties.headers['x-death'][0].count < maxRetries)
-                    ) {
-                        this.channel.nack(message, false, false);
-                    } else {
-                        this.channel.ack(message);
-                    }
-                }
-            },
-        );
-
-        emitter.on(MessageEmitter.MESSAGE_PROCESS_SUCCESS, (messageId: string, resultingMessages: Message[]) => {
-            if (!messageId) {
-                return;
-            }
-            this.channel.ack(this.messagePool.get(messageId));
-            if (resultingMessages) {
-                for (const message of resultingMessages) {
-                    this.publish(message);
-                }
-            }
-            this.messagePool.delete(messageId);
-        });
-
         emitter.on(MessageEmitter.PROCESS_SUCCESS, (resultingMessages: Message[]) => {
             if (resultingMessages) {
                 for (const message of resultingMessages) {
@@ -170,7 +133,7 @@ export default class RabbitMQConnectionFacade {
         }
     }
 
-    public async dispatchMessage(descriptor: string, msg: ConsumeMessage) {
+    public async dispatchMessage(descriptor: string, msg: ConsumeMessage): Promise<void> {
         let handlers = Mercury.handlerRegistry;
 
         if (Reflect.hasMetadata('messageBindings', Mercury.prototype.constructor)) {

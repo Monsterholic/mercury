@@ -1,4 +1,4 @@
-import { Message } from '..';
+import Message from '../message/Message';
 import MessageEmitter from '../messageBus/MessageBusEventEmitter';
 
 const Publisher = () => {

@@ -10,7 +10,7 @@
     "scripts": {
         "coverage": "nyc report --reporter=text-lcov | codacy-coverage",
         "test-coverage": "nyc mocha -r ts-node/register --project tsconfig.spec.json --reporter spec tests/**/*.spec.ts",
-        "test": "mocha -r ts-node/register --project tsconfig.spec.json --reporter spec tests/**/*.spec.ts",
+        "test": "mocha -r ts-node/register --project tsconfig.spec.json --reporter spec --inline-diffs tests/**/*.spec.ts",
         "lint": "eslint '{lib,tests}/**/*.{ts,tsx}' --fix",
         "build": "tsc"
     },
@@ -57,6 +57,7 @@
     "homepage": "https://github.com/Monsterholic/mercury#readme",
     "devDependencies": {
         "@types/chai": "^4.2.0",
+        "@types/chai-as-promised": "^7.1.2",
         "@types/mocha": "^5.2.7",
         "@types/node": "^10.14.9",
         "@types/sinon": "^7.0.13",
@@ -64,6 +65,7 @@
         "@typescript-eslint/eslint-plugin": "^2.0.0",
         "@typescript-eslint/parser": "^2.0.0",
         "chai": "^4.2.0",
+        "chai-as-promised": "^7.1.1",
         "codacy-coverage": "^3.4.0",
         "eslint": "^5.16.0",
         "eslint-config-airbnb-base": "^13.1.0",

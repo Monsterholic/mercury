@@ -24,7 +24,7 @@ export default class RabbitMQMessageBus implements MessageBus {
             this.connectionFacade = null;
             return true;
         } catch (e) {
-            throw e;
+            return false;
         }
     }
 }
