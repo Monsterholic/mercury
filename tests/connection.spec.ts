@@ -1,108 +1,210 @@
-import Mercury, { handler, JSONMessage, BrokerType } from '../lib/index';
+import Mercury, { JSONMessage } from '../lib/index';
 import 'mocha';
 import * as chai from 'chai';
-import * as sinon from 'sinon';
+import * as chaiAsPromised from 'chai-as-promised';
 import * as sinonChai from 'sinon-chai';
+import UserController from './UserController.spec';
+
+import UserCreatedHandler, { spyUserCreatedMessage } from './UserCreatedHandler.spec';
+import OrderCreatedHandler, { spyOrderCreatedHandler } from './OrderCreatedHandler.spec';
+import OrderSucceededHandler, { spyOrderSucceededHandler } from './OrderSucceededHandler.spec';
+
+import OrderController from './OrderController.spec';
 
 const AWAIT_MESSAGE_TIME_MS = 500;
 const AWAIT_END_TIME_MS = 1000;
+const createUserCommandData = { name: 'cl3dson', age: 25 };
+const createOrderComandData = { product: 'blackBox', price: 200 };
 
-chai.should();
+chai.use(chaiAsPromised);
 chai.use(sinonChai);
-
-// A little hacky thing, we must be able to expect on value to assure that the message
-// was send correctly
-const spyUserCreatedMessage = sinon.spy();
-const spyOrderCreatedMessage = sinon.spy();
-const spyOrderSucceededMessage = sinon.spy();
-
-const createUserCommand = { name: 'cl3dson', age: 25 };
-const createOrderComand = { product: 'blackBox', price: 200 };
-
-class TestHandler {
-    //handlers
-    @handler('user-created')
-    public userCreated(message: JSONMessage): void {
-        const content = message.getContent();
-        spyUserCreatedMessage(content);
-    }
-
-    @handler('order-created')
-    public orderCreated(message: JSONMessage): void {
-        const content = message.getContent();
-        spyOrderCreatedMessage(content);
-    }
-
-    @handler('order-succeeded')
-    public orderSucceeded(message: JSONMessage): void {
-        const content = message.getContent();
-        spyOrderSucceededMessage(content);
-    }
-    //publishers
-    @handler()
-    public createUserCommand(message: object): JSONMessage {
-        return new JSONMessage('user-created', message);
-    }
-
-    @handler()
-    public createOrderCommand(message: object): JSONMessage[] {
-        return [new JSONMessage('order-created', message), new JSONMessage('order-succeeded', message)];
-    }
-}
+chai.should();
 
 describe('Broker Connection', () => {
     describe('Connection Error', () => {
-        it('should throw an exception on connection failure', async () => {
-            const mercury = new Mercury(BrokerType.RABBITMQ, 'localhost', 'unused', 'unused', 'testApp', 'testService');
+        it('init() promise should be rejected on connection failure', async () => {
+            const mercury = new Mercury('RABBITMQ', 'localhost', 'unused', 'unused', 'testApp', 'testService');
             try {
-                await mercury.init();
-                await mercury.terminate();
+                mercury.init().should.eventually.be.rejected;
             } catch (e) {
-                chai.assert.instanceOf(e, Error);
                 await mercury.terminate();
             }
         });
     });
-    describe('Connection', () => {
-        it('should connect to rabbitmq broker', async () => {
-            const mercury = new Mercury(BrokerType.RABBITMQ, 'localhost', 'guest', 'guest', 'testApp', 'testService');
-            const initialized = await mercury.init();
-            chai.expect(initialized).to.be.true;
+    describe('connection success', () => {
+        it('init() promise should be fulfilled on connection success', async () => {
+            const mercury = new Mercury('RABBITMQ', 'localhost', 'guest', 'guest', 'testApp', 'testService');
 
-            describe('messaging tests', () => {
-                const handler = new TestHandler();
-                after(() => mercury.terminate());
+            const userCreatedHandler = new UserCreatedHandler();
+            const orderCreatedHandler = new OrderCreatedHandler();
+            const orderSucceededHandler = new OrderSucceededHandler();
 
-                it('can publish user created message', () => {
-                    handler.createUserCommand(createUserCommand);
+            mercury.useHandler(userCreatedHandler);
+            mercury.useHandler(orderCreatedHandler);
+            mercury.useHandler(orderSucceededHandler);
+
+            await mercury.init().should.eventually.be.fulfilled;
+
+            describe('messaging testes', () => {
+                const userController = new UserController();
+                const userResult = userController.createUserCommand(createUserCommandData);
+
+                const orderController = new OrderController();
+                const orderResult = orderController.createOrderCommand(createOrderComandData);
+
+                describe('UserControler', () => {
+                    it('createUserCommand from UserControler return JSONMessage', () => {
+                        userResult.should.be.a.instanceOf(JSONMessage);
+                    });
+
+                    it('message returned from createUserCommand has correct Content', () => {
+                        userResult.getContent().should.be.deep.eq(createUserCommandData);
+                    });
+
+                    it("message returned from createUserCommand has the correct descriptor ('user-created')", () => {
+                        userResult.getDescriptor().should.be.equals('user-created');
+                    });
+
+                    it('message returned from createUserCommand has an uuid', () => {
+                        userResult.getUUID().should.be.a('string');
+                    });
                 });
 
-                it('can publish order created and order succeeded message', () => {
-                    handler.createOrderCommand(createOrderComand);
+                describe('UserCreatedHandler', () => {
+                    it('should consume message published by UserController', done => {
+                        setTimeout(() => {
+                            try {
+                                spyUserCreatedMessage.should.have.been.calledOnce;
+                                done();
+                            } catch (e) {
+                                done(e);
+                            }
+                        }, AWAIT_MESSAGE_TIME_MS);
+                    });
+
+                    it('should consumed message has same content published by UserController', done => {
+                        setTimeout(() => {
+                            try {
+                                spyUserCreatedMessage.args[0][0]
+                                    .getContent()
+                                    .should.be.deep.equals(userResult.getContent());
+                                done();
+                            } catch (e) {
+                                done(e);
+                            }
+                        }, AWAIT_MESSAGE_TIME_MS);
+                    });
+
+                    it('should consumed message has same descriptor published by UserController', done => {
+                        setTimeout(() => {
+                            try {
+                                spyUserCreatedMessage.args[0][0]
+                                    .getDescriptor()
+                                    .should.be.equals(userResult.getDescriptor());
+                                done();
+                            } catch (e) {
+                                done(e);
+                            }
+                        }, AWAIT_MESSAGE_TIME_MS);
+                    });
                 });
 
-                it('can consume user created message ', () => {
-                    setTimeout(() => {
-                        spyUserCreatedMessage.should.have.been.calledOnceWith(createUserCommand);
-                    }, AWAIT_MESSAGE_TIME_MS);
+                describe('OrderController', () => {
+                    it('createOrderCommand from OrderController returns an array of messages', () => {
+                        orderResult.should.be.a('array');
+                        if (Array.isArray(orderResult)) {
+                            for (let result of orderResult) {
+                                result.should.be.a.instanceOf(JSONMessage);
+                            }
+                        }
+                    });
                 });
 
-                it('can consume order created message ', () => {
-                    setTimeout(() => {
-                        spyOrderCreatedMessage.should.have.been.calledOnceWith(createOrderComand);
-                    }, AWAIT_MESSAGE_TIME_MS);
+                describe('OrderCreatedHandler', () => {
+                    it('should consume message published by OrderController', done => {
+                        setTimeout(() => {
+                            try {
+                                spyOrderCreatedHandler.should.have.been.calledOnce;
+                                done();
+                            } catch (e) {
+                                done(e);
+                            }
+                        }, AWAIT_MESSAGE_TIME_MS);
+                    });
+
+                    it('consumed message should have same content published by OrderController', done => {
+                        setTimeout(() => {
+                            try {
+                                spyOrderCreatedHandler.args[0][0]
+                                    .getContent()
+                                    .should.be.deep.equals(orderResult[0].getContent());
+                                done();
+                            } catch (e) {
+                                done(e);
+                            }
+                        }, AWAIT_MESSAGE_TIME_MS);
+                    });
+
+                    it("consumed message should have same descriptor published by OrderController ('order-created')", done => {
+                        setTimeout(() => {
+                            try {
+                                spyOrderCreatedHandler.args[0][0]
+                                    .getDescriptor()
+                                    .should.be.equals(orderResult[0].getDescriptor());
+                                done();
+                            } catch (e) {
+                                done(e);
+                            }
+                        }, AWAIT_MESSAGE_TIME_MS);
+                    });
                 });
 
-                it('can consume order succeeded message ', () => {
-                    setTimeout(() => {
-                        spyOrderSucceededMessage.should.have.been.calledOnceWith(createOrderComand);
-                    }, AWAIT_MESSAGE_TIME_MS);
+                describe('OrderSucceededHandler', () => {
+                    it('should consume message published by OrderController', done => {
+                        setTimeout(() => {
+                            try {
+                                spyOrderSucceededHandler.should.have.been.calledOnce;
+                                done();
+                            } catch (e) {
+                                done(e);
+                            }
+                        }, AWAIT_MESSAGE_TIME_MS);
+                    });
+
+                    it('consumed message should have same content published by OrderController', done => {
+                        setTimeout(() => {
+                            try {
+                                spyOrderSucceededHandler.args[0][0]
+                                    .getContent()
+                                    .should.be.deep.equals(orderResult[1].getContent());
+                                done();
+                            } catch (e) {
+                                done(e);
+                            }
+                        }, AWAIT_MESSAGE_TIME_MS);
+                    });
+
+                    it("consumed message should have same descriptor published by OrderController ('order-succeeded')", done => {
+                        setTimeout(() => {
+                            try {
+                                spyOrderSucceededHandler.args[0][0]
+                                    .getDescriptor()
+                                    .should.be.equals(orderResult[1].getDescriptor());
+                                done();
+                            } catch (e) {
+                                done(e);
+                            }
+                        }, AWAIT_MESSAGE_TIME_MS);
+                    });
                 });
 
-                it('should terminate broker connection', done => {
-                    setTimeout(() => {
-                        done();
-                    }, AWAIT_END_TIME_MS);
+                describe('Connection', () => {
+                    it('should finish connection', done => {
+                        setTimeout(() => {
+                            mercury.terminate().should.eventually.be.fulfilled;
+                            done();
+                        }, AWAIT_END_TIME_MS);
+                    });
                 });
             });
         });

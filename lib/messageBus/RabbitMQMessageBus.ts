@@ -10,8 +10,8 @@ export default class RabbitMQMessageBus implements MessageBus {
         this.connectionFacade = new RabbitMQConnectionFacade(serviceName, appName, retryDelay);
         try {
             await this.connectionFacade.connect(brokerHostName, brokerUserName, brokerPassword);
-            const descriptors: string[] = Reflect.getMetadata('descriptors', Mercury);
-            await this.connectionFacade.subscribeAll(descriptors);
+            const messageBindings: Map<string, string> = Reflect.getMetadata('messageBindings', Mercury);
+            await this.connectionFacade.subscribeAll(messageBindings);
             return true;
         } catch (e) {
             throw e;
@@ -24,7 +24,7 @@ export default class RabbitMQMessageBus implements MessageBus {
             this.connectionFacade = null;
             return true;
         } catch (e) {
-            throw e;
+            return false;
         }
     }
 }

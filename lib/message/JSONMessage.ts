@@ -2,7 +2,11 @@ import Message from './Message';
 
 export default class JSONMessage extends Message {
     public getContent(): object {
-        return JSON.parse(this.content.toString());
+        if (this.content instanceof Buffer) {
+            return JSON.parse(this.content.toString());
+        } else {
+            return this.content;
+        }
     }
 
     public getSerializedContent(): string {
