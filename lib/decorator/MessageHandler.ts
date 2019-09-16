@@ -1,6 +1,6 @@
-import Mercury from '..';
+import { Mercury } from '../Mercury';
 
-const MessageHandler = (messageDescriptor: string) => {
+export const MessageHandler = (messageDescriptor: string) => {
     return (constructor: Function) => {
         if (!Reflect.hasMetadata('messageBindings', Mercury.prototype.constructor)) {
             Reflect.defineMetadata('messageBindings', new Map(), Mercury.prototype.constructor);
@@ -9,5 +9,3 @@ const MessageHandler = (messageDescriptor: string) => {
         binding.set(messageDescriptor, constructor.name);
     };
 };
-
-export default MessageHandler;

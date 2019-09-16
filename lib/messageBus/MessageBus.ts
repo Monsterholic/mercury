@@ -7,7 +7,7 @@ export interface OptionsMap {
     retryDelay: number;
 }
 
-export default interface MessageBus {
+export interface MessageBus {
     configure(args: OptionsMap): Promise<boolean>;
     terminate(): Promise<boolean>;
 }

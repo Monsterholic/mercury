@@ -1,6 +1,6 @@
 import * as uuid from 'uuid';
 
-export default abstract class Message {
+export abstract class Message {
     protected readonly content: any;
     private readonly uuid: string;
     private readonly descriptor: string;

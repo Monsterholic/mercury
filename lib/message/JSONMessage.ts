@@ -1,6 +1,6 @@
-import Message from './Message';
+import { Message } from './Message';
 
-export default class JSONMessage extends Message {
+export class JSONMessage extends Message {
     public getContent(): object {
         if (this.content instanceof Buffer) {
             return JSON.parse(this.content.toString());

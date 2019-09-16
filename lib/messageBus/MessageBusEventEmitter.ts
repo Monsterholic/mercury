@@ -1,6 +1,6 @@
 import * as EventEmitter from 'events';
 
-export default class MessageEmitter extends EventEmitter {
+export class MessageEmitter extends EventEmitter {
     public static readonly PROCESS_SUCCESS: string = 'PROCESS_SUCCESS';
     public static readonly MESSAGE_PROCESS_SUCCESS: string = 'MESSAGE_PROCESS_SUCCESS';
     public static readonly MESSAGE_PROCESS_ERROR: string = 'MESSAGE_PROCESS_ERROR';

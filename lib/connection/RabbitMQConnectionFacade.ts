@@ -1,13 +1,11 @@
 import { Channel, connect, Connection, ConsumeMessage } from 'amqplib';
-import Message from '../message/Message';
-import MessageEmitter from '../messageBus/MessageBusEventEmitter';
-import JSONMessage from '../message/JSONMessage';
-import Mercury from '..';
+import { MessageEmitter } from '../messageBus/MessageBusEventEmitter';
+import Mercury, { Message, JSONMessage } from '..';
 
 const MAX_RETRIES = 14;
 const DEFAULT_MS_STEP = 1000;
 
-export default class RabbitMQConnectionFacade {
+export class RabbitMQConnectionFacade {
     private readonly main_bus: string = 'mercury_bus';
     private connection: Connection;
     private channel: Channel;
@@ -65,7 +63,7 @@ export default class RabbitMQConnectionFacade {
                 protocol: 'amqp',
                 username,
             });
-            this.connection.on('error', () => () => {});
+            this.connection.on('error', () => {});
             this.channel = await this.connection.createChannel();
             this.channel.on('error', () => {});
             await this.setUp();

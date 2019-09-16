@@ -1,14 +1,14 @@
-import RabbitMQMessageBus from './messageBus/RabbitMQMessageBus';
-import MessageBus from './messageBus/MessageBus';
-import Handler from './handler/Handler';
+import { RabbitMQMessageBus } from './messageBus/RabbitMQMessageBus';
+import { MessageBus } from './messageBus/MessageBus';
+import { Handler } from './handler/Handler';
+
+const DEFAULT_RETRY_DELAY_TIME = 60;
 
 export enum BrokerType {
     RABBITMQ = 'RABBITMQ',
 }
 
-const DEFAULT_RETRY_DELAY_TIME = 60;
-
-export default class Mercury {
+export class Mercury {
     public static handlerRegistry: Map<string, Handler> = new Map();
     private messageBus: MessageBus;
     private appName: string;

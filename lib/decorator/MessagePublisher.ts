@@ -1,7 +1,7 @@
-import Message from '../message/Message';
-import MessageEmitter from '../messageBus/MessageBusEventEmitter';
+import { Message } from '..';
+import { MessageEmitter } from '../messageBus/MessageBusEventEmitter';
 
-const MessagePublisher = (): MethodDecorator => {
+export const MessagePublisher = (): MethodDecorator => {
     return function(target: any, propertyKey: string, propertyDescriptor: PropertyDescriptor): void {
         const originalFunc = propertyDescriptor.value;
 
@@ -18,4 +18,3 @@ const MessagePublisher = (): MethodDecorator => {
         };
     };
 };
-export default MessagePublisher;

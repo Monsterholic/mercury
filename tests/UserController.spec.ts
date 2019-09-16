@@ -1,5 +1,4 @@
-import MessagePublisher from '../lib/decorator/MessagePublisher';
-import JSONMessage from '../lib/message/JSONMessage';
+import { MessagePublisher, JSONMessage } from '../lib';
 
 export default class UserController {
     @MessagePublisher()
