@@ -3,13 +3,11 @@ import 'mocha';
 import * as chai from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 import * as sinonChai from 'sinon-chai';
-import UserController from './UserController.spec';
-
-import UserCreatedHandler, { spyUserCreatedMessage } from './UserCreatedHandler.spec';
-import OrderCreatedHandler, { spyOrderCreatedHandler } from './OrderCreatedHandler.spec';
-import OrderSucceededHandler, { spyOrderSucceededHandler } from './OrderSucceededHandler.spec';
-
-import OrderController from './OrderController.spec';
+import { UserController } from './UserController.spec';
+import { OrderController } from './OrderController.spec';
+import { UserCreatedHandler, spyUserCreatedMessage } from './UserCreatedHandler.spec';
+import { OrderCreatedHandler, spyOrderCreatedHandler } from './OrderCreatedHandler.spec';
+import { OrderSucceededHandler, spyOrderSucceededHandler } from './OrderSucceededHandler.spec';
 
 const AWAIT_MESSAGE_TIME_MS = 500;
 const AWAIT_END_TIME_MS = 1000;
