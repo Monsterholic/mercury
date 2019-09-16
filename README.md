@@ -23,7 +23,7 @@ define the handlers functions for interested "events" or messages that occurs wi
 
 To begin consuming messages, Start Mercury, providing the broker configuration values in your index file:
 
-```javascript
+```typescript
 import Mercury from 'mercury-messenger';
 import './testHandler';
 
@@ -34,11 +34,11 @@ mercury.init();
 
 create class handlers for the corresponding event/message
 
-```javascript
+```typescript
 import { MessageHandler, Handler, JSONMessage } from 'mercury-messenger';
 
 @MessageHandler('user-created')
-class UserCreatedHandler extends Handler {
+class UserCreatedHandler implements Handler {
     handle(msg) {
         console.log('A user has been created');
 
@@ -48,7 +48,7 @@ class UserCreatedHandler extends Handler {
 }
 
 @MessageHandler('order-created')
-class OrderCreatedHandler extends Handler {
+class OrderCreatedHandler implements Handler {
     handle(msg) {
         console.log('Something has been ordered');
 
@@ -63,7 +63,7 @@ class OrderCreatedHandler extends Handler {
 
 And finnaly register handlerClasses in Mercury instance and init mercury after that:
 
-```javascript
+```typescript
 mercury.useHandler(new OrderCreatedHandler());
 mercury.useHandler(new UserCreatedHandler());
 mercury.init();
@@ -75,7 +75,7 @@ Now, messages published in the broker by Mercury are correctly routed and consum
 
 To publish messages just use @MessagePublisher decorator in any method,return a new Mercury message in it and it's done.
 
-```javascript
+```typescript
 import { MessagePublisher, JSONMessage } from 'mercury-message';
 
 export class OrderController {
@@ -91,7 +91,7 @@ export class OrderController {
 
 You must provide some information regarding broker credentials and names for your service
 
-```javascript
+```typescript
 let mercury = new Mercury(applicationName, brokerHostName, brokerUserName, brokerPassword, serviceName, retryDelay);
 ```
 
@@ -109,7 +109,7 @@ List of mercury constructor parameters:
 
 ### Mercury Initialization
 
-```javascript
+```typescript
 mercury.init();
 ```
 
@@ -121,8 +121,8 @@ registering handlers as well.It's important to call this method only when all Me
 
 Mercury needs MessageHandlers to work, message handlers are special classes that provide information about what
 events or messages the application is interested and provide the logic to run when some message occur in the broker.
-Use class decorator @MessageHandler and extends the Handler class to define proper messageHandlers compatible with Mercury.
-Extending Handler class implies the implementation of the handle() method in your class.
+Use class decorator @MessageHandler and implements the Handler class to define proper messageHandlers compatible with Mercury.
+Implementing Handler class implies the implementation of the handle() method in your class.
 Register message handlers instances using the userHandler() method prior to Mercury initialization.
 
 #### Errors
@@ -130,9 +130,9 @@ Register message handlers instances using the userHandler() method prior to Merc
 If an error is thown during the message handling, the message will not be acknowledged in the message broker,and will be
 retried some time later.
 
-```javascript
+```typescript
 @MessageHandler('user-created')
-class UserCreatedHandler extends Handler {
+class UserCreatedHandler implements Handler {
     handle(msg) {
         console.log('A user has been created');
 
@@ -151,9 +151,9 @@ You can define the delay between retries in Mercury constructor.
 If there is no errors during handler execution, then any Message or array of Messages returned by the handler function will be
 published into the system messaging ecosystem and possibly consumed by others subscribers services.
 
-```javascript
+```typescript
 @MessageHandler('order-created')
-class OrderCreatedHandler extends Handler {
+class OrderCreatedHandler implements Handler {
     handle(msg) {
         console.log('Something has been ordered');
 
@@ -171,7 +171,7 @@ class OrderCreatedHandler extends Handler {
 Message publish are intended to only procuce new Mercury messages and publish then into the broker.
 To publish messages to the broker Just use the '@MessagePublisher' decorator and return a new message:
 
-```javascript
+```typescript
 import { MessagePublisher, JSONMessage } from 'mercury-message';
 
 export class OrderController {
