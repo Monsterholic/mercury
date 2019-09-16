@@ -1,6 +1,6 @@
 import { Message } from '..';
 
-export default abstract class Handler {
+export abstract class Handler {
     constructor() {}
-    abstract handle(msg: Message): any;
+    public abstract async handle(msg: Message): Promise<void | Message | Message[]>;
 }

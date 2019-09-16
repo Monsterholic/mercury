@@ -19,95 +19,130 @@ define the handlers functions for interested "events" or messages that occurs wi
 
 ## Quick Example
 
-Start Mercury, providing the broker configuration values in your index file:
+### Message Consumers
+
+To begin consuming messages, Start Mercury, providing the broker configuration values in your index file:
 
 ```javascript
 import Mercury from 'mercury-messenger';
 import './testHandler';
 
-let mercury = new Mercury('rabbitmq', 'localhost', 'user', 'password', 'testApp', 'testService');
+let mercury = new Mercury('RABBITMQ', 'localhost', 'user', 'password', 'testApp', 'testService');
+
 mercury.init();
 ```
 
-Now, define your own class with as many handlers are needed for your service:
+create class handlers for the corresponding event/message
 
 ```javascript
-import { handler, JSONMessage } from 'mercury-messenger';
+import { MessageHandler, Handler, JSONMessage } from 'mercury-messenger';
 
-class testHandler {
-    @handler('user-created', 30)
-    handler1(msg) {
+@MessageHandler('user-created')
+class UserCreatedHandler extends Handler {
+    handle(msg) {
         console.log('A user has been created');
 
-        // if a error occurs during execution, this message will be retried 30 times
+        // if a error occurs during execution, this message will be retried
         throw new Error('something gone wrong');
     }
+}
 
-    @handler('order-created')
-    handler2(msg) {
+@MessageHandler('order-created')
+class OrderCreatedHandler extends Handler {
+    handle(msg) {
         console.log('Something has been ordered');
 
         let msgContent = msg.getContent();
-        //your business rule ...
 
-        //return a new message, or array of message if needed
+        /*your business rule (service call, database operations, etc ...)*/
+
         return new JSONMessage('product-purchased', { test: 'data' });
+    }
+}
+```
+
+And finnaly register handlerClasses in Mercury instance and init mercury after that:
+
+```javascript
+mercury.useHandler(new OrderCreatedHandler());
+mercury.useHandler(new UserCreatedHandler());
+mercury.init();
+```
+
+Now, messages published in the broker by Mercury are correctly routed and consumed by subscribed applications.
+
+### Message Producers
+
+To publish messages just use @MessagePublisher decorator in any method,return a new Mercury message in it and it's done.
+
+```javascript
+import { MessagePublisher, JSONMessage } from 'mercury-message';
+
+export class OrderController {
+    @MessagePublisher()
+    public async createOrderCommand(request){
+        await newOrder = orderDatabaseService.save(request.data)
+        return new JSONMessage('order-created', newOrder)
     }
 }
 ```
 
 ### Mercury Configuration
 
+You must provide some information regarding broker credentials and names for your service
+
 ```javascript
-let mercury = new Mercury(
-    appName: string,
-    brokerHostName: string,
-    brokerUserName: string,
-    brokerPassword: string,
-    serviceName: string,
-    retryDelay: number
-);
+let mercury = new Mercury(applicationName, brokerHostName, brokerUserName, brokerPassword, serviceName, retryDelay);
 ```
 
--   AppName - A descriptor/name for your entire distributed system (only services defined with the same 'appName' communicate with each other)
--   serviceName - A descriptor/name for the current service
--   brokerType - Here we define the message broker used (only rabbitmq supported for now)
--   brokerAddress - Message broker address
--   brokerUser - message broker admin credentials
--   brokerPassword - message broker password por provided user
--   retryDelay (optional) - the default delay in seconds during retries (default 60)
+List of mercury constructor parameters:
+
+|                       | type   | description                                                                                                                      |
+| --------------------- | ------ | -------------------------------------------------------------------------------------------------------------------------------- |
+| applicationName       | string | A descriptor/name for your entire distributed system (only services defined with the same 'appName' communicate with each other) |
+| serviceName           | string | A descriptor/name for the current service                                                                                        |
+| brokerType            | string | Here we define the message broker used (only rabbitmq supported for now)                                                         |
+| brokerAddress         | string | Message broker address                                                                                                           |
+| brokerUser            | string | message broker admin credentials                                                                                                 |
+| brokerPassword        | string | message broker password por provided user                                                                                        |
+| retryDelay (optional) | number | the default delay in seconds during retries (default 60)                                                                         |
 
 ### Mercury Initialization
 
-```
+```javascript
 mercury.init();
 ```
 
-The init method start the process to configure broker with the provided configuration and
-registering handlers as well.
+The init() method start the process to configure broker with the provided configuration and
+registering handlers as well.It's important to call this method only when all Mercury configuration is done
+(please be aware that handlers instances must be added to Mercury before using the userHandler() method)
 
-### Handlers
+### Message Handlers
 
-Any function can become a messageHandler, just use @handler as decorator providing a message name/descriptor and optionally
-a max number of retries for the handler.
+Mercury needs MessageHandlers to work, message handlers are special classes that provide information about what
+events or messages the application is interested and provide the logic to run when some message occur in the broker.
+Use class decorator @MessageHandler and extends the Handler class to define proper messageHandlers compatible with Mercury.
+Extending Handler class implies the implementation of the handle() method in your class.
+Register message handlers instances using the userHandler() method prior to Mercury initialization.
 
 #### Errors
 
-If an error is thown inside a handler decorated function, the message will not be acknowledged in the message broker,and will be
+If an error is thown during the message handling, the message will not be acknowledged in the message broker,and will be
 retried some time later.
 
 ```javascript
-    @handler('user-created', 30)
-    handler1(msg) {
+@MessageHandler('user-created')
+class UserCreatedHandler extends Handler {
+    handle(msg) {
         console.log('A user has been created');
 
-        // if a error occurs during execution, this message will be retried 30 times
+        // if a error occurs during execution, this message will be retried
         throw new Error('something gone wrong');
     }
+}
 ```
 
-The second parameter to @handler decorator is optional,it define how many times mercury will try to processs this message.If no
-value, message will not be retried.Be careful with database logic or external services invocation here, Always find some way to
+Be careful with database logic or external services invocation here, Always find some way to
 rollback or revert previous operations before handler finish if the operations aren't idempotent.
 You can define the delay between retries in Mercury constructor.
 
@@ -117,44 +152,36 @@ If there is no errors during handler execution, then any Message or array of Mes
 published into the system messaging ecosystem and possibly consumed by others subscribers services.
 
 ```javascript
- @handler('order-created')
-    handler2(msg) {
+@MessageHandler('order-created')
+class OrderCreatedHandler extends Handler {
+    handle(msg) {
         console.log('Something has been ordered');
 
         let msgContent = msg.getContent();
-        //your business rule ...
 
-        //return a new message, or array of message if needed
+        /*your business rule (service call, database operations, etc ...)*/
+
         return new JSONMessage('product-purchased', { test: 'data' });
     }
+}
 ```
 
 ### Publishers
 
-You can define a no-reactive handler function that is intended to publish messages only.Just use the '@handler' decorator
-without arguments:
+Message publish are intended to only procuce new Mercury messages and publish then into the broker.
+To publish messages to the broker Just use the '@MessagePublisher' decorator and return a new message:
 
 ```javascript
-import * as express from "express";
-import { interfaces, controller, httpGet, httpPost, httpDelete, request, queryParam, response, requestParam } from "inversify-express-utils";
-import {handler,JSONMessage} from "mercury-messenger";
+import { MessagePublisher, JSONMessage } from 'mercury-message';
 
-@controller("/foo")
-export class TestController implements interfaces.Controller {
-
-    @httpPost("/")
-    @handler()
-    public async index(req: express.Request, res: express.Response, next: express.NextFunction): Promise<JSONMessage> {
-        res.status(201).send('user creation solicited');
-        return new JSONMessage("create-user-command",{"name":"jonh"})
+export class OrderController {
+    @MessagePublisher()
+    public async createOrderCommand(request){
+        await newOrder = orderDatabaseService.save(request.data)
+        return new JSONMessage('order-created', newOrder)
     }
 }
-
 ```
-
-In this case,function will not be called for any new message.but now you can control when invoke the function.In the example
-above @handler decorator is chained with another decorator provided by 'inversify-express-utils' package to automatic routing.Any Messages
-or Array of messages returned here will be published in the message bus.If the returned value is not a Message instance, then it's ignored.
 
 ## TODO
 

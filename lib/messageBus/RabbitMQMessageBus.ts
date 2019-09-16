@@ -1,8 +1,8 @@
-import RabbitMQConnectionFacade from '../connection/RabbitMQConnectionFacade';
-import Mercury from '../Mercury';
-import MessageBus, { OptionsMap } from './MessageBus';
+import { RabbitMQConnectionFacade } from '../connection/RabbitMQConnectionFacade';
+import { Mercury } from '../Mercury';
+import { MessageBus, OptionsMap } from './MessageBus';
 
-export default class RabbitMQMessageBus implements MessageBus {
+export class RabbitMQMessageBus implements MessageBus {
     private connectionFacade: RabbitMQConnectionFacade;
 
     public async configure(args: OptionsMap): Promise<boolean> {
@@ -24,7 +24,7 @@ export default class RabbitMQMessageBus implements MessageBus {
             this.connectionFacade = null;
             return true;
         } catch (e) {
-            throw e;
+            return false;
         }
     }
 }

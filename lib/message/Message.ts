@@ -1,6 +1,6 @@
 import * as uuid from 'uuid';
 
-export default abstract class Message {
+export abstract class Message {
     protected readonly content: any;
     private readonly uuid: string;
     private readonly descriptor: string;
@@ -9,7 +9,7 @@ export default abstract class Message {
 
     public constructor(
         descriptor: string,
-        content,
+        content: any,
         id: string = null,
         timestamp: number = null,
         parentMessage: string = null,
