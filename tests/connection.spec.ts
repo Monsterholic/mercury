@@ -11,6 +11,8 @@ import { OrderSucceededHandler, spyOrderSucceededHandler } from './OrderSucceede
 
 const AWAIT_MESSAGE_TIME_MS = 500;
 const AWAIT_END_TIME_MS = 1000;
+const FIRST_ARRAY_ELEM = 0;
+const SECOND_ARRAY_ELEM = 1;
 const createUserCommandData = { name: 'cl3dson', age: 25 };
 const createOrderComandData = { product: 'blackBox', price: 200 };
 
@@ -83,9 +85,9 @@ describe('Broker Connection', () => {
                     it('should consumed message has same content published by UserController', done => {
                         setTimeout(() => {
                             try {
-                                spyUserCreatedMessage.args[0][0]
-                                    .getContent()
-                                    .should.be.deep.equals(userResult.getContent());
+                                spyUserCreatedMessage.args[FIRST_ARRAY_ELEM][
+                                    FIRST_ARRAY_ELEM
+                                ].getContent().should.be.deep.equals(userResult.getContent());
                                 done();
                             } catch (e) {
                                 done(e);
@@ -96,9 +98,9 @@ describe('Broker Connection', () => {
                     it('should consumed message has same descriptor published by UserController', done => {
                         setTimeout(() => {
                             try {
-                                spyUserCreatedMessage.args[0][0]
-                                    .getDescriptor()
-                                    .should.be.equals(userResult.getDescriptor());
+                                spyUserCreatedMessage.args[FIRST_ARRAY_ELEM][
+                                    FIRST_ARRAY_ELEM
+                                ].getDescriptor().should.be.equals(userResult.getDescriptor());
                                 done();
                             } catch (e) {
                                 done(e);
@@ -133,9 +135,9 @@ describe('Broker Connection', () => {
                     it('consumed message should have same content published by OrderController', done => {
                         setTimeout(() => {
                             try {
-                                spyOrderCreatedHandler.args[0][0]
-                                    .getContent()
-                                    .should.be.deep.equals(orderResult[0].getContent());
+                                spyOrderCreatedHandler.args[FIRST_ARRAY_ELEM][
+                                    FIRST_ARRAY_ELEM
+                                ].getContent().should.be.deep.equals(orderResult[FIRST_ARRAY_ELEM].getContent());
                                 done();
                             } catch (e) {
                                 done(e);
@@ -146,9 +148,9 @@ describe('Broker Connection', () => {
                     it("consumed message should have same descriptor published by OrderController ('order-created')", done => {
                         setTimeout(() => {
                             try {
-                                spyOrderCreatedHandler.args[0][0]
-                                    .getDescriptor()
-                                    .should.be.equals(orderResult[0].getDescriptor());
+                                spyOrderCreatedHandler.args[FIRST_ARRAY_ELEM][
+                                    FIRST_ARRAY_ELEM
+                                ].getDescriptor().should.be.equals(orderResult[FIRST_ARRAY_ELEM].getDescriptor());
                                 done();
                             } catch (e) {
                                 done(e);
@@ -172,9 +174,9 @@ describe('Broker Connection', () => {
                     it('consumed message should have same content published by OrderController', done => {
                         setTimeout(() => {
                             try {
-                                spyOrderSucceededHandler.args[0][0]
-                                    .getContent()
-                                    .should.be.deep.equals(orderResult[1].getContent());
+                                spyOrderSucceededHandler.args[FIRST_ARRAY_ELEM][
+                                    FIRST_ARRAY_ELEM
+                                ].getContent().should.be.deep.equals(orderResult[SECOND_ARRAY_ELEM].getContent());
                                 done();
                             } catch (e) {
                                 done(e);
@@ -185,9 +187,9 @@ describe('Broker Connection', () => {
                     it("consumed message should have same descriptor published by OrderController ('order-succeeded')", done => {
                         setTimeout(() => {
                             try {
-                                spyOrderSucceededHandler.args[0][0]
-                                    .getDescriptor()
-                                    .should.be.equals(orderResult[1].getDescriptor());
+                                spyOrderSucceededHandler.args[FIRST_ARRAY_ELEM][
+                                    FIRST_ARRAY_ELEM
+                                ].getDescriptor().should.be.equals(orderResult[SECOND_ARRAY_ELEM].getDescriptor());
                                 done();
                             } catch (e) {
                                 done(e);
