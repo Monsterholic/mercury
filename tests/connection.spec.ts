@@ -95,7 +95,7 @@ describe('Broker Connection', () => {
                         }, AWAIT_MESSAGE_TIME_MS);
                     });
 
-                    it('should consumed message has same descriptor published by UserController', done => {
+                    it("consumed message has same descriptor published by UserController ('user-created') ", done => {
                         setTimeout(() => {
                             try {
                                 spyUserCreatedMessage.args[FIRST_ARRAY_ELEM][
@@ -145,7 +145,7 @@ describe('Broker Connection', () => {
                         }, AWAIT_MESSAGE_TIME_MS);
                     });
 
-                    it("consumed message should have same descriptor published by OrderController ('order-created')", done => {
+                    it("message should have same descriptor published by OrderController('order-created')", done => {
                         setTimeout(() => {
                             try {
                                 spyOrderCreatedHandler.args[FIRST_ARRAY_ELEM][
@@ -184,7 +184,7 @@ describe('Broker Connection', () => {
                         }, AWAIT_MESSAGE_TIME_MS);
                     });
 
-                    it("consumed message should have same descriptor published by OrderController ('order-succeeded')", done => {
+                    it("message should have same descriptor published by OrderController('order-succeeded')", done => {
                         setTimeout(() => {
                             try {
                                 spyOrderSucceededHandler.args[FIRST_ARRAY_ELEM][
