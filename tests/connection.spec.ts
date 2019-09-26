@@ -45,12 +45,12 @@ describe('Broker Connection', () => {
 
             await mercury.init().should.eventually.be.fulfilled;
 
-            describe('messaging testes', () => {
+            describe('messaging testes', async () => {
                 const userController = new UserController();
-                const userResult = userController.createUserCommand(createUserCommandData);
+                const userResult = await userController.createUserCommand(createUserCommandData);
 
                 const orderController = new OrderController();
-                const orderResult = orderController.createOrderCommand(createOrderComandData);
+                const orderResult = await orderController.createOrderCommand(createOrderComandData);
 
                 describe('UserControler', () => {
                     it('createUserCommand from UserControler return JSONMessage', () => {
