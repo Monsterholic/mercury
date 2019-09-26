@@ -2,7 +2,7 @@ import { MessagePublisher, JSONMessage } from '../lib';
 
 export class UserController {
     @MessagePublisher()
-    public createUserCommand(message: object): JSONMessage {
+    public async createUserCommand(message: object): Promise<JSONMessage> {
         return new JSONMessage('user-created', message);
     }
 }
