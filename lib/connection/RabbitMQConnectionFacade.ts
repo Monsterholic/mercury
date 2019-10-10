@@ -6,7 +6,6 @@ const MAX_RETRIES = 14;
 const DEFAULT_MS_STEP = 1000;
 
 export class RabbitMQConnectionFacade {
-    private readonly main_bus: string = 'mercury_bus';
     private connection: Connection;
     private channel: Channel;
     private readonly exchange: string;
@@ -106,7 +105,7 @@ export class RabbitMQConnectionFacade {
     }
 
     public publish(message: Message, alternativeExchange: string = null): boolean {
-        const exchange = alternativeExchange ? alternativeExchange : this.main_bus;
+        const exchange = alternativeExchange ? alternativeExchange : this.appName;
         try {
             return this.channel.publish(
                 exchange,
@@ -188,7 +187,7 @@ export class RabbitMQConnectionFacade {
     private async setUp(): Promise<boolean> {
         /* Creating Exchanges and queues */
         try {
-            await this.channel.assertExchange(this.main_bus, 'fanout', {
+            await this.channel.assertExchange(this.appName, 'fanout', {
                 autoDelete: false,
                 durable: true,
             });
@@ -215,7 +214,7 @@ export class RabbitMQConnectionFacade {
             });
 
             /* Creating the basic bindings */
-            await this.channel.bindExchange(this.exchange, this.main_bus, '');
+            await this.channel.bindExchange(this.exchange, this.appName, '');
             await this.channel.bindQueue(this.retryQueue, this.deadLetterExchange, '');
         } catch (e) {
             throw e;
