@@ -27,7 +27,7 @@ export class Mercury {
         appName: string,
         serviceName: string,
         retryDelayTime: number = DEFAULT_RETRY_DELAY_TIME,
-        filterMessages: boolean = true,
+        filterMessages: true,
     ) {
         this.appName = appName;
         this.serviceName = serviceName;
