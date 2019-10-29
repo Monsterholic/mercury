@@ -6,8 +6,16 @@ export class RabbitMQMessageBus implements MessageBus {
     private connectionFacade: RabbitMQConnectionFacade;
 
     public async configure(args: OptionsMap): Promise<boolean> {
-        const { brokerHostName, brokerUserName, brokerPassword, appName, serviceName, retryDelay } = args;
-        this.connectionFacade = new RabbitMQConnectionFacade(serviceName, appName, retryDelay);
+        const {
+            brokerHostName,
+            brokerUserName,
+            brokerPassword,
+            appName,
+            serviceName,
+            retryDelay,
+            filterMessages,
+        } = args;
+        this.connectionFacade = new RabbitMQConnectionFacade(serviceName, appName, retryDelay, filterMessages);
         try {
             await this.connectionFacade.connect(brokerHostName, brokerUserName, brokerPassword);
             const messageBindings: Map<string, string> = Reflect.getMetadata('messageBindings', Mercury);

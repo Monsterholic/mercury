@@ -15,8 +15,9 @@ export class RabbitMQConnectionFacade {
     private readonly appName: string;
     private readonly delayRetry: number;
     private messagePool: Map<string, ConsumeMessage>;
+    private filterTrafic: boolean;
 
-    public constructor(serviceName: string, appName: string, delayRetry: number) {
+    public constructor(serviceName: string, appName: string, delayRetry: number, filterTrafic: boolean) {
         this.exchange = serviceName;
         this.deadLetterExchange = `${this.exchange}_dlx`;
         this.queue = `${serviceName}_queue`;
@@ -24,6 +25,7 @@ export class RabbitMQConnectionFacade {
         this.appName = appName;
         this.delayRetry = delayRetry;
         this.messagePool = new Map<string, ConsumeMessage>();
+        this.filterTrafic = filterTrafic;
     }
 
     public async subscribeAll(messageBindings: Map<string, string>): Promise<boolean> {
@@ -86,7 +88,7 @@ export class RabbitMQConnectionFacade {
 
         try {
             await this.channel.consume(`${this.queue}`, (msg: ConsumeMessage): void => {
-                if (msg.properties.appId === this.appName) {
+                if (!this.filterTrafic || msg.properties.appId === this.appName) {
                     if (msg.properties.messageId) {
                         const descriptor = msg.fields.routingKey;
                         this.messagePool.set(msg.properties.messageId, msg);
