@@ -27,7 +27,7 @@ export class Mercury {
         appName: string,
         serviceName: string,
         retryDelayTime: number = DEFAULT_RETRY_DELAY_TIME,
-        filterMessages = true,
+        filterMessages: boolean = true,
     ) {
         this.appName = appName;
         this.serviceName = serviceName;
@@ -54,9 +54,9 @@ export class Mercury {
                 brokerHostName: this.brokerHostName,
                 brokerPassword: this.brokerPassword,
                 brokerUserName: this.brokerUserName,
+                filterMessages: this.filterMessages,
                 retryDelay: this.retryDelayTime,
                 serviceName: this.serviceName,
-                filterMessages: this.filterMessages,
             });
         } catch (e) {
             throw e;
