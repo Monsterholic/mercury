@@ -66,7 +66,12 @@ export class RabbitMQConnectionFacade {
             });
             this.connection.on('error', () => {});
             this.channel = await this.connection.createChannel();
-            this.channel.on('error', () => {});
+            this.channel.on('error', error => {
+                console.error(error);
+            });
+            this.channel.on('close', () => {
+                console.log('rabbitmq channel closed');
+            });
             await this.setUp();
         } catch (e) {
             throw e;
