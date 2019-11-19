@@ -9,9 +9,9 @@
     ],
     "scripts": {
         "coverage": "nyc report --reporter=text-lcov | codacy-coverage",
-        "test-coverage": "nyc mocha -r ts-node/register --project tsconfig.spec.json --reporter spec tests/**/*.spec.ts",
-        "test": "mocha -r ts-node/register --project tsconfig.spec.json --reporter spec --inline-diffs tests/**/*.spec.ts",
-        "lint": "eslint '{lib,tests}/**/*.{ts,tsx}' --fix",
+        "test-coverage": "nyc mocha -r ts-node/register --project tsconfig.spec.json --reporter spec test/**/*.spec.ts  --exit",
+        "test": "mocha -r ts-node/register --project tsconfig.spec.json --reporter spec --inline-diffs test/**/*.spec.ts --exit",
+        "lint": "eslint '{lib,test}/**/*.{ts,tsx}' --fix",
         "build": "tsc"
     },
     "repository": {

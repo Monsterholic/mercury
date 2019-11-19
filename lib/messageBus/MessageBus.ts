@@ -10,5 +10,4 @@ export interface OptionsMap {
 
 export interface MessageBus {
     configure(args: OptionsMap): Promise<boolean>;
-    terminate(): Promise<boolean>;
 }

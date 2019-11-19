@@ -25,14 +25,4 @@ export class RabbitMQMessageBus implements MessageBus {
             throw e;
         }
     }
-
-    public async terminate(): Promise<boolean> {
-        try {
-            await this.connectionFacade.disconnect();
-            this.connectionFacade = null;
-            return true;
-        } catch (e) {
-            return false;
-        }
-    }
 }

@@ -1,6 +1,7 @@
 import { Channel, connect, Connection, ConsumeMessage } from 'amqplib';
 import { MessageEmitter } from '../messageBus/MessageBusEventEmitter';
 import Mercury, { Message, JSONMessage } from '..';
+import { ResultingMessages } from '../message/ResultingMessages';
 
 const MAX_RETRIES = 14;
 const DEFAULT_MS_STEP = 1000;
@@ -39,22 +40,6 @@ export class RabbitMQConnectionFacade {
         }
     }
 
-    public async disconnect(): Promise<boolean> {
-        if (this.connection) {
-            try {
-                this.channel.removeAllListeners();
-                await this.channel.close();
-                await this.connection.close();
-                this.connection = undefined;
-                return true;
-            } catch (e) {
-                throw e;
-            }
-        } else {
-            return false;
-        }
-    }
-
     public async connect(hostname: string, username: string, password: string): Promise<Connection> {
         try {
             this.connection = await connect({
@@ -64,7 +49,9 @@ export class RabbitMQConnectionFacade {
                 protocol: 'amqp',
                 username,
             });
-            this.connection.on('error', () => {});
+            this.connection.on('error', err => {
+                console.error(err);
+            });
             this.channel = await this.connection.createChannel();
             this.channel.on('error', error => {
                 console.error(error);
@@ -79,9 +66,9 @@ export class RabbitMQConnectionFacade {
 
         const emitter = MessageEmitter.getMessageEmitter();
 
-        emitter.on(MessageEmitter.PROCESS_SUCCESS, (resultingMessages: Message[]) => {
-            if (resultingMessages) {
-                for (const message of resultingMessages) {
+        emitter.on(MessageEmitter.PROCESS_SUCCESS, (resultingMessages: ResultingMessages) => {
+            if (resultingMessages.messages) {
+                for (const message of resultingMessages.messages) {
                     try {
                         this.publish(message);
                     } catch (e) {

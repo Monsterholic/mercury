@@ -66,8 +66,4 @@ export class Mercury {
     public useHandler(handler: Handler): void {
         Mercury.handlerRegistry.set(handler.constructor.name, handler);
     }
-
-    public async terminate(): Promise<boolean> {
-        return await this.messageBus.terminate();
-    }
 }
