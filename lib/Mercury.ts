@@ -18,6 +18,7 @@ export class Mercury {
     private brokerPassword: string;
     private retryDelayTime: number;
     private filterMessages: boolean;
+    private preFetch: number
 
     public constructor(
         brokerType: string,
@@ -28,6 +29,7 @@ export class Mercury {
         serviceName: string,
         retryDelayTime: number = DEFAULT_RETRY_DELAY_TIME,
         filterMessages = true,
+        preFetch = 2
     ) {
         this.appName = appName;
         this.serviceName = serviceName;
@@ -36,6 +38,7 @@ export class Mercury {
         this.brokerPassword = brokerPassword;
         this.retryDelayTime = retryDelayTime;
         this.filterMessages = filterMessages;
+        this.preFetch = preFetch;
 
         switch (brokerType) {
             case BrokerType.RABBITMQ:
@@ -57,6 +60,7 @@ export class Mercury {
                 filterMessages: this.filterMessages,
                 retryDelay: this.retryDelayTime,
                 serviceName: this.serviceName,
+                preFetch: this.preFetch
             });
         } catch (e) {
             throw e;
