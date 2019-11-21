@@ -16,8 +16,9 @@ export class RabbitMQConnectionFacade {
     private readonly delayRetry: number;
     private messagePool: Map<string, ConsumeMessage>;
     private filterTrafic: boolean;
+    private preFetch: number;
 
-    public constructor(serviceName: string, appName: string, delayRetry: number, filterTrafic: boolean) {
+    public constructor(serviceName: string, appName: string, delayRetry: number, filterTrafic: boolean, preFetch: number) {
         this.exchange = serviceName;
         this.deadLetterExchange = `${this.exchange}_dlx`;
         this.queue = `${serviceName}_queue`;
@@ -26,6 +27,7 @@ export class RabbitMQConnectionFacade {
         this.delayRetry = delayRetry;
         this.messagePool = new Map<string, ConsumeMessage>();
         this.filterTrafic = filterTrafic;
+        this.preFetch = preFetch
     }
 
     public async subscribeAll(messageBindings: Map<string, string>): Promise<boolean> {
@@ -64,7 +66,7 @@ export class RabbitMQConnectionFacade {
                 protocol: 'amqp',
                 username,
             });
-            this.connection.on('error', () => {});
+            this.connection.on('error', () => { });
             this.channel = await this.connection.createChannel();
             this.channel.on('error', error => {
                 console.error(error);
@@ -92,6 +94,7 @@ export class RabbitMQConnectionFacade {
         });
 
         try {
+            this.channel.prefetch(this.preFetch);
             await this.channel.consume(`${this.queue}`, (msg: ConsumeMessage): void => {
                 if (!this.filterTrafic || msg.properties.appId === this.appName) {
                     if (msg.properties.messageId) {
@@ -162,8 +165,8 @@ export class RabbitMQConnectionFacade {
                             Array.isArray(result) && result.every(r => r instanceof Message)
                                 ? result
                                 : result instanceof Message
-                                ? [result]
-                                : null;
+                                    ? [result]
+                                    : null;
 
                         this.channel.ack(this.messagePool.get(msg.properties.messageId));
                         if (resultMessages) {
