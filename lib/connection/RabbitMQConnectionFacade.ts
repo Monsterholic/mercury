@@ -95,12 +95,12 @@ export class RabbitMQConnectionFacade {
 
         try {
             this.channel.prefetch(this.preFetch);
-            await this.channel.consume(`${this.queue}`, (msg: ConsumeMessage): void => {
+            await this.channel.consume(`${this.queue}`, async (msg: ConsumeMessage): Promise<void> => {
                 if (!this.filterTrafic || msg.properties.appId === this.appName) {
                     if (msg.properties.messageId) {
                         const descriptor = msg.fields.routingKey;
                         this.messagePool.set(msg.properties.messageId, msg);
-                        this.dispatchMessage(descriptor, msg);
+                        await this.dispatchMessage(descriptor, msg);
                     } else {
                         this.channel.ack(msg);
                     }
