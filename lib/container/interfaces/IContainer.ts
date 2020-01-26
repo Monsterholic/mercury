@@ -1,9 +1,10 @@
+import { IBindingContext } from "./IBinding";
+
 export interface IContainer {
-    bind<T>(identifier: string): IBinding<T>;
+    bind<T>(identifier: string): IBindingContext<T>;
     get<T>(identifier: string): T;
     unbind(identifier: string): void;
 }
 
-export interface IBinding<T> {
-    to(constructor: new (...args: any) => T);
-}
+
+export type Replaceable<T> = new (args: any[]) => T; 
