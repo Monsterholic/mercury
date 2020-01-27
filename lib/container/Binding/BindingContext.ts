@@ -1,5 +1,5 @@
-import { IBindingContext, IBinding } from "./interfaces/IBinding";
-import { Replaceable } from "./interfaces/IContainer";
+import { IBindingContext, IBinding } from "../interfaces/IBinding";
+import { Replaceable } from "../interfaces/IContainer";
 
 export class BindingContext<T> implements IBindingContext<T> {
     binding: IBinding<T>;
