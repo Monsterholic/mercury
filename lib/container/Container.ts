@@ -3,6 +3,7 @@ import { IBindingContext, IBinding } from './interfaces/IBinding';
 import { BindingContext } from './Binding/BindingContext';
 import { Binding } from './Binding/Binding';
 import { IBindingDictionary, BindingDictionary } from './Binding/BindingDictionary';
+import { handlerInstance } from './handler.instance';
 
 export class Container implements IContainer {
     private bindingDictionary: IBindingDictionary<IBinding<any>>;
@@ -18,10 +19,11 @@ export class Container implements IContainer {
     }
 
     get<T>(identifier: string): T {
-        throw new Error('Method not implemented.');
+        const instance = this.bindingDictionary.get(identifier);
+        return handlerInstance.resolve(instance.implementation_main);
     }
 
     unbind(identifier: string): void {
-        throw new Error('Method not implemented.');
+        this.bindingDictionary.remove(identifier);
     }
 }
