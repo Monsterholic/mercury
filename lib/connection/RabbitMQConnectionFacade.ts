@@ -23,7 +23,7 @@ export class RabbitMQConnectionFacade {
         appName: string,
         delayRetry: number,
         filterTrafic: boolean,
-        preFetch: number,
+        preFetch: number = 2,
     ) {
         this.exchange = serviceName;
         this.deadLetterExchange = `${this.exchange}_dlx`;
@@ -154,6 +154,8 @@ export class RabbitMQConnectionFacade {
 
     public async dispatchMessage(descriptor: string, msg: ConsumeMessage): Promise<void> {
         const handlers = Mercury.handlerRegistry;
+
+        //const container =
 
         if (Reflect.hasMetadata('messageBindings', Mercury.prototype.constructor)) {
             const bindings: Map<string, string> = Reflect.getMetadata('messageBindings', Mercury.prototype.constructor);

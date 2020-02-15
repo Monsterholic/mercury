@@ -1,6 +1,8 @@
 import { RabbitMQMessageBus } from './messageBus/RabbitMQMessageBus';
 import { MessageBus } from './messageBus/MessageBus';
 import { Handler } from './handler/Handler';
+import { IContainer } from './container/interfaces/IContainer';
+import { Container } from './container/Container';
 
 const DEFAULT_RETRY_DELAY_TIME = 60;
 
@@ -18,7 +20,8 @@ export class Mercury {
     private brokerPassword: string;
     private retryDelayTime: number;
     private filterMessages: boolean;
-    private preFetch: number
+    private preFetch: number;
+    private container: IContainer;
 
     public constructor(
         brokerType: string,
@@ -29,7 +32,7 @@ export class Mercury {
         serviceName: string,
         retryDelayTime: number = DEFAULT_RETRY_DELAY_TIME,
         filterMessages = true,
-        preFetch = 2
+        preFetch = 2,
     ) {
         this.appName = appName;
         this.serviceName = serviceName;
@@ -60,7 +63,7 @@ export class Mercury {
                 filterMessages: this.filterMessages,
                 retryDelay: this.retryDelayTime,
                 serviceName: this.serviceName,
-                preFetch: this.preFetch
+                preFetch: this.preFetch,
             });
         } catch (e) {
             throw e;
@@ -69,6 +72,10 @@ export class Mercury {
 
     public useHandler(handler: Handler): void {
         Mercury.handlerRegistry.set(handler.constructor.name, handler);
+    }
+
+    public setContainer(container: IContainer): void {
+        this.container = container;
     }
 
     public async terminate(): Promise<boolean> {

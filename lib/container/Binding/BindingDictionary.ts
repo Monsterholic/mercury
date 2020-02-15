@@ -13,7 +13,7 @@ export class BindingDictionary<T> implements IBindingDictionary<T> {
         this.dictionary = new Map();
     }
 
-    add(identifier: string, binding: IBinding<T>) {
+    add(identifier: string, binding: IBinding<T>): void {
         this.dictionary.set(identifier, binding);
     }
 
