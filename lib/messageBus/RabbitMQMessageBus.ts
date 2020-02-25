@@ -1,9 +1,15 @@
 import { RabbitMQConnectionFacade } from '../connection/RabbitMQConnectionFacade';
 import { Mercury } from '../Mercury';
 import { MessageBus, OptionsMap } from './MessageBus';
+import { IContainer } from '../container/interfaces/IContainer';
 
 export class RabbitMQMessageBus implements MessageBus {
     private connectionFacade: RabbitMQConnectionFacade;
+    private container: IContainer;
+
+    constructor(container: IContainer) {
+        this.container = container;
+    }
 
     public async configure(args: OptionsMap): Promise<boolean> {
         const {
@@ -14,9 +20,16 @@ export class RabbitMQMessageBus implements MessageBus {
             serviceName,
             retryDelay,
             filterMessages,
-            preFetch
+            preFetch,
         } = args;
-        this.connectionFacade = new RabbitMQConnectionFacade(serviceName, appName, retryDelay, filterMessages, preFetch);
+        this.connectionFacade = new RabbitMQConnectionFacade(
+            serviceName,
+            appName,
+            retryDelay,
+            filterMessages,
+            preFetch,
+            this.container,
+        );
         try {
             await this.connectionFacade.connect(brokerHostName, brokerUserName, brokerPassword);
             const messageBindings: Map<string, string> = Reflect.getMetadata('messageBindings', Mercury);

@@ -42,19 +42,23 @@ export class Mercury {
         this.retryDelayTime = retryDelayTime;
         this.filterMessages = filterMessages;
         this.preFetch = preFetch;
+    }
 
+    public setMessageBus(brokerType: BrokerType = BrokerType.RABBITMQ): void {
+        if (!this.container) throw Error('container not initilizer.');
         switch (brokerType) {
             case BrokerType.RABBITMQ:
-                this.messageBus = new RabbitMQMessageBus();
+                this.messageBus = new RabbitMQMessageBus(this.container);
                 break;
             default:
-                this.messageBus = new RabbitMQMessageBus();
+                this.messageBus = new RabbitMQMessageBus(this.container);
                 break;
         }
     }
 
     public async init(): Promise<boolean> {
         try {
+            this.setMessageBus();
             return await this.messageBus.configure({
                 appName: this.appName,
                 brokerHostName: this.brokerHostName,
