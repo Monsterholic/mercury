@@ -4,7 +4,7 @@ export const handlerInstance = new (class {
     resolve<T>(target: Type<any>): T {
         const instances: Array<any> = Reflect.getMetadata('design:paramtypes', target) || [];
 
-        console.log('[X] count dependences: ', instances.length);
+        console.log('[X] count dependencies: ', instances.length);
 
         const instancesInjections = instances.map((instance: any) => handlerInstance.resolve(instance));
 
