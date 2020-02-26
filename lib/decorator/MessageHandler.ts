@@ -7,6 +7,5 @@ export const MessageHandler = (messageDescriptor: string) => {
         }
         const binding: Map<string, string> = Reflect.getMetadata('messageBindings', Mercury.prototype.constructor);
         binding.set(messageDescriptor, constructor.name);
-        console.log(Reflect.getMetadata('design:paramtypes', constructor));
     };
 };
