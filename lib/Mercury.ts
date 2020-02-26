@@ -45,7 +45,7 @@ export class Mercury {
     }
 
     public setMessageBus(brokerType: BrokerType = BrokerType.RABBITMQ): void {
-        if (!this.container) throw Error('container not initilizer.');
+        if (!this.container) throw Error('container not instantiated.');
         switch (brokerType) {
             case BrokerType.RABBITMQ:
                 this.messageBus = new RabbitMQMessageBus(this.container);

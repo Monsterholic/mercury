@@ -19,8 +19,9 @@ export class Container implements IContainer {
     }
 
     get<T>(identifier: string): T {
-        const instance = this.bindingDictionary.get(identifier);
-        return handlerInstance.resolve(instance.implementation_main);
+        const binding = this.bindingDictionary.get(identifier);
+        if (!binding) throw Error(`${identifier} not found binding.`);
+        return handlerInstance.resolve(binding.implementation_main);
     }
 
     unbind(identifier: string): void {

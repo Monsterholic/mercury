@@ -14,6 +14,7 @@ export class BindingDictionary<T> implements IBindingDictionary<T> {
     }
 
     add(identifier: string, binding: IBinding<T>): void {
+        if (this.dictionary.has(identifier)) throw Error(`already exists bind for identifier: ${identifier}`);
         this.dictionary.set(identifier, binding);
     }
 
