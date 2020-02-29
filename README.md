@@ -64,8 +64,13 @@ class OrderCreatedHandler implements Handler {
 And finnaly register handlerClasses in Mercury instance and init mercury after that:
 
 ```typescript
-mercury.useHandler(new OrderCreatedHandler());
-mercury.useHandler(new UserCreatedHandler());
+const container = new Container()
+
+container.bind("BIND1").to(OrderCreatedHandler)
+container.bind("BIND2").to(UserCreatedHandler)
+
+mercury.setContainer(container)
+
 mercury.init();
 ```
 
