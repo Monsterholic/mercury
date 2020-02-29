@@ -2,14 +2,14 @@ import { IContainer } from './interfaces/IContainer';
 import { IBindingContext, IBinding } from './interfaces/IBinding';
 import { BindingContext } from './Binding/BindingContext';
 import { Binding } from './Binding/Binding';
-import { IBindingDictionary, BindingDictionary } from './Binding/BindingDictionary';
+import { BindingDictionary, BDictionary } from './Binding/BindingDictionary';
 import { handlerInstance } from './handler.instance';
 
 export class Container implements IContainer {
-    private bindingDictionary: IBindingDictionary<IBinding<any>>;
+    private bindingDictionary: BindingDictionary<IBinding<any>>;
 
     constructor() {
-        this.bindingDictionary = new BindingDictionary();
+        this.bindingDictionary = new BDictionary();
     }
 
     bind<T>(identifier: string): IBindingContext<T> {
@@ -21,7 +21,7 @@ export class Container implements IContainer {
     get<T>(identifier: string): T {
         const binding = this.bindingDictionary.get(identifier);
         if (!binding) throw Error(`${identifier} not found binding.`);
-        return handlerInstance.resolve(binding.implementation_main);
+        return handlerInstance.resolve(binding.implementationMain);
     }
 
     unbind(identifier: string): void {

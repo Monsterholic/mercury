@@ -26,7 +26,7 @@ export class RabbitMQConnectionFacade {
         appName: string,
         delayRetry: number,
         filterTrafic: boolean,
-        preFetch: number = 2,
+        preFetch = 2,
         container: IContainer,
     ) {
         this.exchange = serviceName;

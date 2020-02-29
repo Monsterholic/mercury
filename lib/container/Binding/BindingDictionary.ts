@@ -1,12 +1,12 @@
 import { IBinding } from '../interfaces/IBinding';
 
-export interface IBindingDictionary<T> {
+export interface BindingDictionary<T> {
     add(identifier: string, binding: IBinding<T>);
     get(identifier: string): IBinding<T>;
     remove(identifier: string): boolean;
 }
 
-export class BindingDictionary<T> implements IBindingDictionary<T> {
+export class BDictionary<T> implements BindingDictionary<T> {
     private dictionary: Map<string, IBinding<T>>;
 
     constructor() {

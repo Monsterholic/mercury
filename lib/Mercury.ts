@@ -2,7 +2,6 @@ import { RabbitMQMessageBus } from './messageBus/RabbitMQMessageBus';
 import { MessageBus } from './messageBus/MessageBus';
 import { Handler } from './handler/Handler';
 import { IContainer } from './container/interfaces/IContainer';
-import { Container } from './container/Container';
 
 const DEFAULT_RETRY_DELAY_TIME = 60;
 

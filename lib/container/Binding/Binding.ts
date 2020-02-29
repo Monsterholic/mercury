@@ -1,12 +1,15 @@
 import { IBinding } from '../interfaces/IBinding';
 import { Replaceable } from '../interfaces/IContainer';
 import { identifier } from './identifierCount';
+import { TypeBinding } from './BindingEnum';
 
 export class Binding<T> implements IBinding<T> {
-    binding_id: number;
-    implementation_main: Replaceable<any>;
+    bindingId: number;
+    implementationMain: Replaceable<any>;
+    type: TypeBinding;
+    implementationConstantValue: any;
 
     constructor() {
-        this.binding_id = identifier();
+        this.bindingId = identifier();
     }
 }
