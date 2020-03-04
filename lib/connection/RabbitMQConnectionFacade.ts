@@ -1,7 +1,7 @@
 import { Channel, connect, Connection, ConsumeMessage } from 'amqplib';
 import { MessageEmitter } from '../messageBus/MessageBusEventEmitter';
 import Mercury, { Message, JSONMessage, Handler } from '..';
-import { IContainer } from '../container/interfaces/IContainer';
+import { Container } from '../container/interfaces/IContainer';
 
 const MAX_RETRIES = 14;
 const DEFAULT_MS_STEP = 1000;
@@ -19,7 +19,7 @@ export class RabbitMQConnectionFacade {
     private filterTrafic: boolean;
     private preFetch: number;
 
-    private container: IContainer;
+    private container: Container;
 
     public constructor(
         serviceName: string,
@@ -27,7 +27,7 @@ export class RabbitMQConnectionFacade {
         delayRetry: number,
         filterTrafic: boolean,
         preFetch = 2,
-        container: IContainer,
+        container: Container,
     ) {
         this.exchange = serviceName;
         this.deadLetterExchange = `${this.exchange}_dlx`;
@@ -77,7 +77,6 @@ export class RabbitMQConnectionFacade {
                 protocol: 'amqp',
                 username,
             });
-            this.connection.on('error', () => {});
             this.channel = await this.connection.createChannel();
             this.channel.on('error', error => {
                 console.error(error);
@@ -158,7 +157,7 @@ export class RabbitMQConnectionFacade {
     }
 
     public async dispatchMessage(descriptor: string, msg: ConsumeMessage): Promise<void> {
-        const handlers = Mercury.handlerRegistry;
+        //const handlers = Mercury.handlerRegistry;
 
         const handler = this.container.get<Handler>(descriptor);
 

@@ -1,9 +1,9 @@
-import { IBinding } from '../interfaces/IBinding';
+import { Binding } from '../interfaces/IBinding';
 import { Replaceable } from '../interfaces/IContainer';
 import { identifier } from './identifierCount';
 import { TypeBinding } from './BindingEnum';
 
-export class Binding<T> implements IBinding<T> {
+export class BindingCustom<T> implements Binding<T> {
     bindingId: number;
     implementationMain: Replaceable<any>;
     type: TypeBinding;

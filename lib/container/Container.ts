@@ -1,21 +1,21 @@
-import { IContainer } from './interfaces/IContainer';
-import { IBindingContext, IBinding } from './interfaces/IBinding';
-import { BindingContext } from './Binding/BindingContext';
-import { Binding } from './Binding/Binding';
+import { Container } from './interfaces/IContainer';
+import { BindingContext, Binding } from './interfaces/IBinding';
+import { MercuryBinding } from './Binding/BindingContext';
+import { BindingCustom } from './Binding/Binding';
 import { BindingDictionary, BDictionary } from './Binding/BindingDictionary';
 import { handlerInstance } from './handler.instance';
 
-export class Container implements IContainer {
-    private bindingDictionary: BindingDictionary<IBinding<any>>;
+export class ContainerMercury implements Container {
+    private bindingDictionary: BindingDictionary<Binding<any>>;
 
     constructor() {
         this.bindingDictionary = new BDictionary();
     }
 
-    bind<T>(identifier: string): IBindingContext<T> {
-        const binding = new Binding();
+    bind<T>(identifier: string): BindingContext<T> {
+        const binding = new BindingCustom<T>();
         this.bindingDictionary.add(identifier, binding);
-        return new BindingContext(binding);
+        return new MercuryBinding(binding);
     }
 
     get<T>(identifier: string): T {

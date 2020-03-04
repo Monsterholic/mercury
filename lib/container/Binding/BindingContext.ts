@@ -1,11 +1,11 @@
-import { IBindingContext, IBinding } from '../interfaces/IBinding';
+import { BindingContext, Binding } from '../interfaces/IBinding';
 import { Replaceable } from '../interfaces/IContainer';
 import { TypeBinding } from './BindingEnum';
 
-export class BindingContext<T> implements IBindingContext<T> {
-    binding: IBinding<T>;
+export class MercuryBinding<T> implements BindingContext<T> {
+    binding: Binding<T>;
 
-    constructor(binding: IBinding<T>) {
+    constructor(binding: Binding<T>) {
         this.binding = binding;
     }
 

@@ -1,7 +1,7 @@
 import { RabbitMQMessageBus } from './messageBus/RabbitMQMessageBus';
 import { MessageBus } from './messageBus/MessageBus';
 import { Handler } from './handler/Handler';
-import { IContainer } from './container/interfaces/IContainer';
+import { Container } from './container/interfaces/IContainer';
 
 const DEFAULT_RETRY_DELAY_TIME = 60;
 
@@ -20,7 +20,7 @@ export class Mercury {
     private retryDelayTime: number;
     private filterMessages: boolean;
     private preFetch: number;
-    private container: IContainer;
+    private container: Container;
 
     public constructor(
         brokerType: string,
@@ -77,7 +77,7 @@ export class Mercury {
         Mercury.handlerRegistry.set(handler.constructor.name, handler);
     }
 
-    public setContainer(container: IContainer): void {
+    public setContainer(container: Container): void {
         this.container = container;
     }
 
