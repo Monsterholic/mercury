@@ -3,7 +3,7 @@ import 'mocha';
 import { expect } from 'chai';
 
 import { handlerInstance, InjectDependecy } from '../../lib/container/handler.instance';
-import { Container } from '../../lib/container/Container';
+import { ContainerMercury } from '../../lib/container/Container';
 
 describe('Function Injector', () => {
     it('should return new instance', () => {
@@ -64,7 +64,7 @@ describe('Function Injector', () => {
     });
 
     it('should create new instance a each call get of container class', () => {
-        const container = new Container();
+        const container = new ContainerMercury();
 
         interface I {
             print(): void;

@@ -1,10 +1,10 @@
 import 'mocha';
 import { expect } from 'chai';
-import { Container } from '../../lib/container/Container';
+import { ContainerMercury } from '../../lib/container/Container';
 
 describe('Container', () => {
     it('should throw exception if identifier exists', () => {
-        const container = new Container();
+        const container = new ContainerMercury();
         class Test {}
 
         container.bind('BindEvent').to(Test);
@@ -15,7 +15,7 @@ describe('Container', () => {
     });
 
     it('should throw exception if binding not exists', () => {
-        const container = new Container();
+        const container = new ContainerMercury();
 
         expect(() => {
             const instance = container.get('BindEvent');
