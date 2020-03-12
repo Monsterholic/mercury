@@ -14,9 +14,15 @@ export class RabbitMQMessageBus implements MessageBus {
             serviceName,
             retryDelay,
             filterMessages,
-            preFetch
+            preFetch,
         } = args;
-        this.connectionFacade = new RabbitMQConnectionFacade(serviceName, appName, retryDelay, filterMessages, preFetch);
+        this.connectionFacade = new RabbitMQConnectionFacade(
+            serviceName,
+            appName,
+            retryDelay,
+            filterMessages,
+            preFetch,
+        );
         try {
             await this.connectionFacade.connect(brokerHostName, brokerUserName, brokerPassword);
             const messageBindings: Map<string, string> = Reflect.getMetadata('messageBindings', Mercury);

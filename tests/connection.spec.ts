@@ -1,3 +1,4 @@
+/* eslint-disable */
 import Mercury, { JSONMessage } from '../lib/index';
 import 'mocha';
 import * as chai from 'chai';

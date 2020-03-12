@@ -6,7 +6,7 @@ export interface OptionsMap {
     serviceName: string;
     retryDelay: number;
     filterMessages: boolean;
-    preFetch: number
+    preFetch: number;
 }
 
 export interface MessageBus {

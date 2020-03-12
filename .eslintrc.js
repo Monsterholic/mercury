@@ -14,8 +14,10 @@ module.exports = {
         ecmaVersion: 2018,
         sourceType: 'module',
         project: './tsconfig.json',
+        createDefaultProgram: true,
     },
     rules: {
         'no-console': 'off',
+        '@typescript-eslint/no-explicit-any': 'off',
     },
 };
