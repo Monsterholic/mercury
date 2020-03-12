@@ -5,7 +5,7 @@ export const spyOrderCreatedHandler = sinon.spy();
 
 @MessageHandler('order-created')
 export class OrderCreatedHandler implements Handler {
-    public async handle(message: Message): Promise<void> {
+    public handle(message: Message): void {
         spyOrderCreatedHandler(message);
     }
 }

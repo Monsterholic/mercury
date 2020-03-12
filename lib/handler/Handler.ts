@@ -1,5 +1,5 @@
 import { Message } from '..';
 
 export interface Handler {
-    handle(msg: Message): Promise<void | Message | Message[]>;
+    handle(msg: Message): Promise<Message | Message[]> | void;
 }
