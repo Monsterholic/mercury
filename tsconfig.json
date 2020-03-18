@@ -1,9 +1,9 @@
 {
     "compilerOptions": {
         "target": "es2018",
-        "lib": ["es2018", "esnext.asynciterable"],
+        "lib": ["es2018", "esnext.asynciterable", "DOM"],
         "module": "commonjs",
-        "types": ["reflect-metadata", "node"],
+        "types": ["reflect-metadata"],
         "outDir": "dist",
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,

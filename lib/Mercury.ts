@@ -1,6 +1,7 @@
 import { RabbitMQMessageBus } from './messageBus/RabbitMQMessageBus';
 import { MessageBus } from './messageBus/MessageBus';
 import { Handler } from './handler/Handler';
+import { Container } from './container/interfaces/IContainer';
 
 const DEFAULT_RETRY_DELAY_TIME = 60;
 
@@ -18,7 +19,8 @@ export class Mercury {
     private brokerPassword: string;
     private retryDelayTime: number;
     private filterMessages: boolean;
-    private preFetch: number
+    private preFetch: number;
+    private container: Container;
 
     public constructor(
         brokerType: string,
@@ -29,7 +31,7 @@ export class Mercury {
         serviceName: string,
         retryDelayTime: number = DEFAULT_RETRY_DELAY_TIME,
         filterMessages = true,
-        preFetch = 2
+        preFetch = 2,
     ) {
         this.appName = appName;
         this.serviceName = serviceName;
@@ -39,19 +41,23 @@ export class Mercury {
         this.retryDelayTime = retryDelayTime;
         this.filterMessages = filterMessages;
         this.preFetch = preFetch;
+    }
 
+    public setMessageBus(brokerType: BrokerType = BrokerType.RABBITMQ): void {
+        if (!this.container) throw Error('container not instantiated.');
         switch (brokerType) {
             case BrokerType.RABBITMQ:
-                this.messageBus = new RabbitMQMessageBus();
+                this.messageBus = new RabbitMQMessageBus(this.container);
                 break;
             default:
-                this.messageBus = new RabbitMQMessageBus();
+                this.messageBus = new RabbitMQMessageBus(this.container);
                 break;
         }
     }
 
     public async init(): Promise<boolean> {
         try {
+            this.setMessageBus();
             return await this.messageBus.configure({
                 appName: this.appName,
                 brokerHostName: this.brokerHostName,
@@ -60,7 +66,7 @@ export class Mercury {
                 filterMessages: this.filterMessages,
                 retryDelay: this.retryDelayTime,
                 serviceName: this.serviceName,
-                preFetch: this.preFetch
+                preFetch: this.preFetch,
             });
         } catch (e) {
             throw e;
@@ -69,6 +75,10 @@ export class Mercury {
 
     public useHandler(handler: Handler): void {
         Mercury.handlerRegistry.set(handler.constructor.name, handler);
+    }
+
+    public setContainer(container: Container): void {
+        this.container = container;
     }
 
     public async terminate(): Promise<boolean> {

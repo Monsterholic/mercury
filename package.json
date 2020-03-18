@@ -1,6 +1,6 @@
 {
     "name": "mercury-messenger",
-    "version": "2.0.13",
+    "version": "2.1.0",
     "description": "Messaging Helper for Event Driven Systems",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
@@ -11,6 +11,7 @@
         "coverage": "nyc report --reporter=text-lcov | codacy-coverage",
         "test-coverage": "nyc mocha -r ts-node/register --project tsconfig.spec.json --reporter spec tests/**/*.spec.ts",
         "test": "mocha -r ts-node/register --project tsconfig.spec.json --reporter spec --inline-diffs tests/**/*.spec.ts",
+        "test:unique": "mocha -r ts-node/register --project tsconfig.spec.json --reporter spec --inline-diffs",
         "lint": "eslint '{lib,tests}/**/*.{ts,tsx}' --fix",
         "build": "tsc"
     },

@@ -1,6 +1,7 @@
 import { Channel, connect, Connection, ConsumeMessage } from 'amqplib';
 import { MessageEmitter } from '../messageBus/MessageBusEventEmitter';
-import Mercury, { Message, JSONMessage } from '..';
+import Mercury, { Message, JSONMessage, Handler } from '..';
+import { Container } from '../container/interfaces/IContainer';
 
 const MAX_RETRIES = 14;
 const DEFAULT_MS_STEP = 1000;
@@ -18,12 +19,15 @@ export class RabbitMQConnectionFacade {
     private filterTrafic: boolean;
     private preFetch: number;
 
+    private container: Container;
+
     public constructor(
         serviceName: string,
         appName: string,
         delayRetry: number,
         filterTrafic: boolean,
-        preFetch: number,
+        preFetch = 2,
+        container: Container,
     ) {
         this.exchange = serviceName;
         this.deadLetterExchange = `${this.exchange}_dlx`;
@@ -34,6 +38,7 @@ export class RabbitMQConnectionFacade {
         this.messagePool = new Map<string, ConsumeMessage>();
         this.filterTrafic = filterTrafic;
         this.preFetch = preFetch;
+        this.container = container;
     }
 
     public async subscribeAll(messageBindings: Map<string, string>): Promise<boolean> {
@@ -72,7 +77,6 @@ export class RabbitMQConnectionFacade {
                 protocol: 'amqp',
                 username,
             });
-            this.connection.on('error', () => {});
             this.channel = await this.connection.createChannel();
             this.channel.on('error', error => {
                 console.error(error);
@@ -153,14 +157,17 @@ export class RabbitMQConnectionFacade {
     }
 
     public async dispatchMessage(descriptor: string, msg: ConsumeMessage): Promise<void> {
-        const handlers = Mercury.handlerRegistry;
+        //const handlers = Mercury.handlerRegistry;
+
+        const handler = this.container.get<Handler>(descriptor);
 
         if (Reflect.hasMetadata('messageBindings', Mercury.prototype.constructor)) {
             const bindings: Map<string, string> = Reflect.getMetadata('messageBindings', Mercury.prototype.constructor);
             const handlerClassName = bindings.get(descriptor);
             if (handlerClassName) {
-                if (handlers.has(handlerClassName)) {
-                    const handler = handlers.get(handlerClassName);
+                //if (handlers.has(handlerClassName))
+                if (handler) {
+                    //const handler = handlers.get(handlerClassName);
                     try {
                         const MercuryMessage = new JSONMessage(
                             descriptor,
