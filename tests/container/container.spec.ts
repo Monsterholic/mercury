@@ -5,6 +5,7 @@ import { ContainerMercury } from '../../lib/container/Container';
 describe('Container', () => {
     it('should throw exception if identifier exists', () => {
         const container = new ContainerMercury();
+
         class Test {}
 
         container.bind('BindEvent').to(Test);
