@@ -14,6 +14,6 @@ export class AwilixServiceProvider implements IServiceProvider {
         return new AwilixScope(new AwilixServiceProvider(this.awilixContainer.createScope()));
     }
     dispose(): Promise<void> {
-        return this.dispose();
+        return this.awilixContainer.dispose();
     }
 }
