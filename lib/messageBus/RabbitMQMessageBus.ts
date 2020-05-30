@@ -1,13 +1,13 @@
 import { RabbitMQConnectionFacade } from '../connection/RabbitMQConnectionFacade';
 import { Mercury } from '../Mercury';
 import { MessageBus, OptionsMap } from './MessageBus';
-import { Container } from '../container/interfaces/IContainer';
+import { IContainer } from '../di/Interfaces/IContainer';
 
 export class RabbitMQMessageBus implements MessageBus {
     private connectionFacade: RabbitMQConnectionFacade;
-    private container: Container;
+    private container: IContainer;
 
-    constructor(container: Container) {
+    constructor(container: IContainer) {
         this.container = container;
     }
 

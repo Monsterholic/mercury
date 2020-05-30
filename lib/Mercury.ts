@@ -1,7 +1,8 @@
 import { RabbitMQMessageBus } from './messageBus/RabbitMQMessageBus';
 import { MessageBus } from './messageBus/MessageBus';
 import { Handler } from './handler/Handler';
-import { Container } from './container/interfaces/IContainer';
+import { IContainer } from './di/Interfaces/IContainer';
+import { createContainer } from 'awilix';
 
 const DEFAULT_RETRY_DELAY_TIME = 60;
 
@@ -20,10 +21,9 @@ export class Mercury {
     private retryDelayTime: number;
     private filterMessages: boolean;
     private preFetch: number;
-    private container: Container;
+    private container: IContainer;
 
     public constructor(
-        brokerType: string,
         brokerHostName: string,
         brokerUserName: string,
         brokerPassword: string,
@@ -44,7 +44,6 @@ export class Mercury {
     }
 
     public setMessageBus(brokerType: BrokerType = BrokerType.RABBITMQ): void {
-        if (!this.container) throw Error('container not instantiated.');
         switch (brokerType) {
             case BrokerType.RABBITMQ:
                 this.messageBus = new RabbitMQMessageBus(this.container);
@@ -77,7 +76,7 @@ export class Mercury {
         Mercury.handlerRegistry.set(handler.constructor.name, handler);
     }
 
-    public setContainer(container: Container): void {
+    public setContainer(container: IContainer): void {
         this.container = container;
     }
 
