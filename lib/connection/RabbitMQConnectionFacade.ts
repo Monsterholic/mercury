@@ -1,7 +1,7 @@
 import { Channel, connect, Connection, ConsumeMessage } from 'amqplib';
 import { MessageEmitter } from '../messageBus/MessageBusEventEmitter';
 import Mercury, { Message, JSONMessage, Handler } from '..';
-import { Container } from '../container/interfaces/IContainer';
+import { IContainer } from '../di/Interfaces/IContainer';
 
 const MAX_RETRIES = 14;
 const DEFAULT_MS_STEP = 1000;
@@ -19,7 +19,7 @@ export class RabbitMQConnectionFacade {
     private filterTrafic: boolean;
     private preFetch: number;
 
-    private container: Container;
+    private container: IContainer;
 
     public constructor(
         serviceName: string,
@@ -27,7 +27,7 @@ export class RabbitMQConnectionFacade {
         delayRetry: number,
         filterTrafic: boolean,
         preFetch = 2,
-        container: Container,
+        container: IContainer,
     ) {
         this.exchange = serviceName;
         this.deadLetterExchange = `${this.exchange}_dlx`;
@@ -159,7 +159,7 @@ export class RabbitMQConnectionFacade {
     public async dispatchMessage(descriptor: string, msg: ConsumeMessage): Promise<void> {
         //const handlers = Mercury.handlerRegistry;
 
-        const handler = this.container.get<Handler>(descriptor);
+        const handler = this.container.build().get<Handler>(descriptor);
 
         if (Reflect.hasMetadata('messageBindings', Mercury.prototype.constructor)) {
             const bindings: Map<string, string> = Reflect.getMetadata('messageBindings', Mercury.prototype.constructor);
